@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "227042859645",
+    "project_id": "tracklaw-5714e",
+    "storage_bucket": "tracklaw-5714e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:227042859645:android:25e1b8768ca668812eaf14",
+        "android_client_info": {
+          "package_name": "com.example.tracklaw"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAXTq4VPTt_2NZZUu2b8_C0E-1XTRvKbM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

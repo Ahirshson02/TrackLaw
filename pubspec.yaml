@@ -14,6 +14,11 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  xml: ^6.3.0
+  http: ^1.1.0 
+  firebase_core: ^3.12.1
+  firebase_auth: 5.5.1
+  cloud_firestore: 5.6.5
 
 dev_dependencies:
   flutter_test:
