@@ -27,3 +27,5 @@ the `lib/src/localization` directory.
 
 To support additional languages, please visit the tutorial on
 [Internationalizing Flutter apps](https://flutter.dev/to/internationalization).
+
+Mobile App project for Code Crunch 305 Hackathon
