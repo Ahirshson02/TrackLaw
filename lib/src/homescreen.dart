@@ -1,11 +1,17 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:tracklaw/main.dart';
 import 'package:tracklaw/APIs/congressAPI.dart';
 import 'package:tracklaw/src/legistlationPage.dart';
+import '/APIs/firebaseAPI.dart';
 
 class Homescreen extends StatefulWidget{
   final List<Bill> bills;
   final Map<String, List<BillActions>> actions;
+  final firestoreDb = FirebaseFirestore.instance;
+  final FirestoreService f = FirestoreService();
+
   
   Homescreen({Key? key, required this.bills, required this.actions}) : super(key: key);
   @override
@@ -23,7 +29,6 @@ class _HomescreenState extends State<Homescreen>{
   }
 
   
-  //Future<BillWithSummaries> billAndSummaries = await getBillWithSummaries();
   @override
   Widget build(BuildContext context){
     print("In homescreen widget");
@@ -280,8 +285,10 @@ class _BillCardState extends State<BillCard> {
           ],
         ),
       ),
-      onPressed: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => LegistlationPage(bill: widget.bill, action: widget.action)),);
+      onPressed: () async{
+          final FirestoreService f = FirestoreService();
+          f.saveBill(widget.bill);
+        //Navigator.push(context, MaterialPageRoute(builder: (context) => LegistlationPage(bill: widget.bill, action: widget.action)),);
       },
     );
   }

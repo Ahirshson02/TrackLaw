@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import "/APIs/firebaseAPI.dart";
+
 class ChatContainer extends StatelessWidget {
-  final List<ChatMessage> messages;
+  List<ChatMessage> messages;
   final ScrollController? scrollController;
   
-  const ChatContainer({
+   ChatContainer({
     Key? key, 
     required this.messages,
     this.scrollController,
@@ -108,14 +109,14 @@ class MessageBubble extends StatelessWidget {
 // }
 
 // Example usage
-class ChatScreen extends StatefulWidget {
-  const ChatScreen({Key? key}) : super(key: key);
+class ChatInput extends StatefulWidget {
+  const ChatInput({Key? key}) : super(key: key);
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
+  State<ChatInput> createState() => _ChatInputState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatInputState extends State<ChatInput> {
  
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _textController = TextEditingController();
@@ -165,7 +166,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 if (_textController.text.trim().isNotEmpty) {
                   setState(() {
                     //send new message object to list of messages in ChatContainer
-                    _textController.clear();
+                   _textController.clear();
                   });
                   
                   // Auto-scroll to the bottom

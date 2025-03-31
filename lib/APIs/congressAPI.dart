@@ -162,7 +162,7 @@ class Bill {
   Map<String, dynamic> toJson() {
   return {
     'congress': congress,
-    'latestAction': latestAction, // Assuming LatestAction has a toJson method
+    //'latestAction': latestAction, // Assuming LatestAction has a toJson method
     'billNumber': billNumber,
     'originChamber': originChamber,
     'chamberCode': chamberCode,
