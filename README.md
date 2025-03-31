@@ -2,6 +2,8 @@
 
 TrackLaw puts the law in front of the people. Using publically available data from Congress, TrackLaw displays current legislation currently being discussed and passed through Congress, as well as its status and who is in charge of it. TrackLaw provides a summary of the bill so that users can get an overview, but also have the option to open of the bill and read it for themselves. The goal of TrackLaw is to put the law in the hands of the people, so that they can review it and form their own opinions, without the risk of media biases.
 
+<p><a href = 'https://youtu.be/_5_yFX0Oeng?si=HXnPwL0Z8IdL5iuJ'>Click here to see our demo!</a></p>
+
 ## Getting Started
 
 This project is a starting point for a Flutter application that follows the
@@ -36,3 +38,5 @@ Some features are shown but not completed, such as the search bar, filter and so
 <p>AI Chatbot: Google Gemini</p>
 
 Mobile App project for Code Crunch 305 Hackathon
+
+
