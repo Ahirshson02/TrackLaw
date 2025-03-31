@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:tracklaw/First_page/loadingScreen.dart';
-import 'package:tracklaw/First_page/openingPage.dart';
+import 'package:tracklaw/landingPage/loadingScreen.dart';
+import 'package:tracklaw/landingPage/openingPage.dart';
 
 class auth extends StatelessWidget {
   const auth({Key? key}) : super(key: key);

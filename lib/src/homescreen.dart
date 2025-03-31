@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:tracklaw/landingPage/login&signupPage.dart';
 import 'package:tracklaw/main.dart';
-import 'package:tracklaw/APIs/congressAPI.dart';
+import 'package:tracklaw/api/congressAPI.dart';
 import 'package:tracklaw/src/legistlationPage.dart';
-import '/APIs/firebaseAPI.dart';
+import '/api/firebaseAPI.dart';
 
 class Homescreen extends StatefulWidget{
   final List<Bill> bills;
@@ -109,7 +110,7 @@ class _HomescreenState extends State<Homescreen>{
                   // Close the drawer first
                   Navigator.pop(context);
                   // TODO: Replace with your navigation
-                  // Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
+                   Navigator.push(context, MaterialPageRoute(builder: (context) => openingPage()));
                 },
               ),
             ),
@@ -126,7 +127,7 @@ class _HomescreenState extends State<Homescreen>{
                   // Close the drawer first
                   Navigator.pop(context);
                   // TODO: Replace with your navigation
-                  // Navigator.push(context, MaterialPageRoute(builder: (context) => SavedLawsPage()));
+                   Navigator.push(context, MaterialPageRoute(builder: (context) => openingPage()));
                 },
               ),
             ),

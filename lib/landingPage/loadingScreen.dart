@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tracklaw/api/congressAPI.dart';
-import 'package:tracklaw/homescreen/homescreen.dart';
+import 'package:tracklaw/src/homescreen.dart';
 
 class LoadingScreen extends StatefulWidget {
   @override

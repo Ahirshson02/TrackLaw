@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:tracklaw/First_page/Button.dart';
-import 'package:tracklaw/First_page/loadingScreen.dart';
+import 'package:tracklaw/landingPage/Button.dart';
+import 'package:tracklaw/landingPage/loadingScreen.dart';
 import 'package:tracklaw/loginPage/loginPage.dart';
 import 'package:tracklaw/registerPage/textField.dart';
-import 'package:tracklaw/First_page/Squaremaker.dart';
+import 'package:tracklaw/landingPage/Squaremaker.dart';
 //import 'package:tracklaw/First_page/Button.dart';
 
 class RegisterNewAccount extends StatefulWidget {
