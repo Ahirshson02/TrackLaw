@@ -19,13 +19,17 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
     await Future.wait(bills.map((b) async {
       if (b.congress != null && b.billType != null && b.billNumber != null) {
+        
         List<BillActions> actions = await api.getBillActions(
           b.congress!,
           b.billType!,
           b.billNumber!,
         );
         billNumberToActions[b.billId] = actions;
+  
+        print("billactions DONE");
       }
+      
     }));
 
     print("bills populated, navigating to homescreen");

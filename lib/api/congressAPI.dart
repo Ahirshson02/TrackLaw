@@ -34,7 +34,7 @@ class CongressApiService {
     final response = await http.get(Uri.parse(url));
     //else if code == 404, put summary as null/default values
     if (response.statusCode == 200) {
-      print("========= status code == 200");
+      print("========= getbillACtions: status code == 200");
       final data = json.decode(response.body);
 
       // Check if summaries exist
@@ -96,13 +96,30 @@ class CongressApiService {
     }
   }
 
+  Future<BillData> getBillFiles(
+    int congress,
+    String billType,
+    String billNumber,
+    
+  ) async{
+    String url = '$baseUrl/bill/$congress/$billType/$billNumber/text?api_key=$apiKey&format=json';
+
+    final response = await http.get(Uri.parse(url));
+    //else if code == 404, put summary as null/default values
+ 
+    if (response.statusCode == 200) {
+      return BillData.fromJson(response.body);
+    } else {
+      throw BillData();
+    }
+  }
   // Search bills to find bills of interest
   //originall of
   Future<List<Bill>> searchBills({
     int? congress,
     String? billType,
     int offset = 0,
-    int limit = 1,
+    int limit = 50,
   }) async {
     String url =
         '$baseUrl/bill?api_key=$apiKey&offset=$offset&limit=$limit&format=json&fromDateTime=2024-01-01T12:30:30Z&toDateTime=2025-03-01T12:30:30Z';
@@ -170,20 +187,20 @@ class Bill {
     return bill!;
   }
   Map<String, dynamic> toJson() {
-    return {
-      'congress': congress,
-      'latestAction': latestAction, // Assuming LatestAction has a toJson method
-      'billNumber': billNumber,
-      'originChamber': originChamber,
-      'chamberCode': chamberCode,
-      'title': title,
-      'billType': billType,
-      'introducedDate': introducedDate,
-      'urlForMore': urlForMore,
-      'updateDate': updateDate,
-    };
-  }
-
+  return {
+    'congress': congress,
+    'latestAction': latestAction, // Assuming LatestAction has a toJson method
+    'billNumber': billNumber,
+    'originChamber': originChamber,
+    'chamberCode': chamberCode,
+    'title': title,
+    'billType': billType,
+    'introducedDate': introducedDate,
+    'urlForMore': urlForMore,
+    'updateDate': updateDate,
+  };
+}
+  
   // Helper method to get the unique identifier for this bill
   String get billId => '$congress-$billType-$billNumber';
 }
@@ -208,17 +225,22 @@ class LatestAction {
       print("exception in LatestAction.fromJson");
       print("Exception message: $e");
     }
-    return latestAction!;
+   return latestAction!; 
   }
+  Map<String, dynamic> toJson() {
+  return {
+    'actionDate': actionDate,
+    'text': text,
+  };
+}
 }
 
 class BillActions {
   final String? actionCode;
-  final String actionDate;
-  List<Committee>?
-      committees; //not made final each bill's most recent action lacks a committee value. Last action's committee is set to the first's
-  final String text;
-  final String type;
+  final String? actionDate;
+  List<Committee>? committees; //not made final each bill's most recent action lacks a committee value. Last action's committee is set to the first's
+  final String? text;
+  final String? type;
 
   BillActions({
     this.actionCode,
@@ -229,7 +251,13 @@ class BillActions {
   });
 
   factory BillActions.fromJson(Map<String, dynamic> json) {
-    return BillActions(
+    try{
+      // print("${json['actionCode'] ?? "a"}");
+      // print("${json['actionDate'] ?? "b"}");
+      // print("${json['committees'] ?? "c"}");
+      // print("${json['text'] ?? "d"}");
+      // print("${json['type'] ?? "e"}");
+      return BillActions(
       actionCode: json['actionCode'],
       actionDate: json['actionDate'],
       committees: json['committees'] != null
@@ -239,6 +267,16 @@ class BillActions {
       text: json['text'],
       type: json['type'],
     );
+    
+    }catch(e){
+      print("ERROR IN FROMJSON: $e");
+      // print("${json['actionCode'] ?? "a"}");
+      // print("${json['actionDate'] ?? "b"}");
+      // print("${json['committees'] ?? "c"}");
+      // print("${json['text'] ?? "d"}");
+      // print("${json['type'] ?? "e"}");
+    }
+    return BillActions(actionDate: "a", text: "a", type: "a", committees: [], actionCode: "a");
   }
   printBillAction() {
     print("action code: ${actionCode ?? "No code"}, actionDate: $actionDate");
@@ -277,9 +315,8 @@ class Committee {
       'url': url,
     };
   }
-
-  printCommittee() {
-    print("Committee: $name");
+  printCommittee(){
+    print("Committee: ${name ?? "no name"}");
   }
 }
 
@@ -289,7 +326,7 @@ class BillSummary {
   final String? updateDate;
   final String? actionDate;
   final String? actionDesc;
-  final String? text;
+  String? text;
   final String? versionCode;
 
   BillSummary({
@@ -313,6 +350,115 @@ class BillSummary {
   }
 }
 
+class BillFormat {
+  final String? type;
+  final String? url;
+
+  BillFormat({required this.type, required this.url});
+
+  factory BillFormat.fromJson(Map<String, dynamic> json) {
+    return BillFormat(
+      type: json['type'] as String,
+      url: json['url'] as String,
+    );
+  }
+
+  @override
+  String toString() => '$type: $url';
+}
+
+class BillVersion {
+  final String? type;
+  final DateTime? date;
+  final List<BillFormat>? formats;
+
+  BillVersion({required this.type, this.date, required this.formats});
+
+  factory BillVersion.fromJson(Map<String, dynamic> json) {
+    return BillVersion(
+      type: json['type'] as String,
+      date: json['date'] != null ? DateTime.parse(json['date']) : null,
+      formats: (json['formats'] as List<dynamic>)
+          .map((format) => BillFormat.fromJson(format as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  BillFormat? getFormatByType(String formatType) {
+    for (var format in formats!) {
+      if (format.type == formatType) {
+        return format;
+      }
+    }
+    return null;
+  }
+
+  @override
+  String toString() {
+    String dateStr = date != null ? date!.toIso8601String() : 'No date';
+    return '$type ($dateStr)';
+  }
+}
+
+class BillData {
+  final String? billNumber;
+  final String? billType;
+  final String? congress;
+  final List<BillVersion>? textVersions;
+
+  BillData({
+     this.billNumber,
+     this.billType,
+     this.congress,
+     this.textVersions,
+  });
+
+  factory BillData.fromJson(String jsonStr) {
+    final json = jsonDecode(jsonStr) as Map<String, dynamic>;
+    final request = json['request'] as Map<String, dynamic>;
+    
+    return BillData(
+      billNumber: request['billNumber'] as String,
+      billType: request['billType'] as String,
+      congress: request['congress'] as String,
+      textVersions: (json['textVersions'] as List<dynamic>)
+          .map((version) => BillVersion.fromJson(version as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  BillVersion? getLatestVersion() {
+    // Filter versions with dates
+    List<BillVersion>? datedVersions = [];
+    try{
+    datedVersions = textVersions!.where((version) => version.date != null).toList();
+    if (datedVersions.isEmpty) {
+      print("getlatestVersion: datedVersions is empty, returning type == empty");
+      return BillVersion(type: "empty", formats: []);
+    }
+    datedVersions.sort((a, b) => b.date!.compareTo(a.date!)); 
+    }catch(e){
+      print("getlatestVersion threw exceptin: $e");
+      return BillVersion(type: "empty", formats: []);
+    }
+    return datedVersions.first;
+  }
+
+  BillFormat? getLatestPdfFormat() {
+    final BillVersion? latestVersion = getLatestVersion();
+    if (latestVersion == null || latestVersion.type == "empty") {
+      print("in getlatestPDFformat, is null or empty");
+      return BillFormat(type: "empty", url: "");
+    }
+    
+    return latestVersion.getFormatByType('PDF');
+  }
+
+  @override
+  String toString() {
+    return 'Bill $billNumber ($billType) from Congress $congress';
+  }
+}
 
 //---- END RESULTS OF https://api.congress.gov/#/bill/bill_list_all
 

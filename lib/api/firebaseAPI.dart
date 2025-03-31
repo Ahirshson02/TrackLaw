@@ -188,12 +188,17 @@ class FirestoreService {
   // Create a new chat message
   Future<void> sendMessage(ChatMessage message) async {
     // If message ID is not set, generate one
-    final messageId =
-        message.id.isEmpty ? _messagesCollection.doc().id : message.id;
-
+    final messageId = message.id.isEmpty 
+        ? _messagesCollection.doc().id 
+        : message.id;
     await _messagesCollection.doc(messageId).set(message.toMap());
   }
-
+  
+  String getNewMessageID(){
+    final id = _messagesCollection.doc().id;
+    return id;
+  }
+  
   // Get chat messages for a specific bill
   Future<List<ChatMessage>> getMessagesForBill(String billId, String userId,
       {int limit = 50}) async {

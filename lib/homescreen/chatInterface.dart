@@ -1,31 +1,53 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:tracklaw/api/congressAPI.dart';
-import "package:tracklaw/api/firebaseAPI.dart";
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:tracklaw/homescreen/messageService.dart';
+import 'package:tracklaw/src/messageService.dart';
+import "/api/firebaseAPI.dart";
+import '/api/congressAPI.dart';
+import 'legistlationPage.dart';
 
-class ChatContainer extends StatelessWidget {
-  final List<ChatMessage> messages;
-  final ScrollController? scrollController;
 
-  const ChatContainer({
-    Key? key,
+class ChatContainer extends StatefulWidget {
+  List<ChatMessage> messages;
+  final Bill bill;
+   ChatContainer({
+    Key? key, 
     required this.messages,
-    this.scrollController,
+    required this.bill,
+    //this.scrollController,
   }) : super(key: key);
+
+State<ChatContainer> createState() => _ChatContainer();
+}
+class _ChatContainer extends State<ChatContainer>{
+  final ScrollController? scrollController = ScrollController();
+  late StreamSubscription<ChatMessage> _subscription;
+ 
+  @override
+void initState() {
+  super.initState();
+  _subscription = MessageService().messageStream.listen((message) {
+    setState(() {
+      widget.messages.add(message);
+    });
+  });
+}
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 300,
+      constraints: BoxConstraints(
+        minHeight: 50,
+        maxHeight: 300,
+      ),
       decoration: BoxDecoration(
         color: Colors.grey[100],
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black,
             blurRadius: 10,
-            spreadRadius: 1,
+            spreadRadius: 0.5,
           ),
         ],
       ),
@@ -35,10 +57,11 @@ class ChatContainer extends StatelessWidget {
         child: ListView.builder(
           controller: scrollController,
           padding: const EdgeInsets.all(12),
-          itemCount: messages.length,
+          itemCount: widget.messages.length,
           physics: const BouncingScrollPhysics(),
+          shrinkWrap: true,
           itemBuilder: (context, index) {
-            final message = messages[index];
+            final message = widget.messages[index];
             return MessageBubble(
               message: message.text,
               isUser: message.isFromUser,
@@ -97,6 +120,8 @@ class MessageBubble extends StatelessWidget {
       ),
     );
   }
+
+  
 }
 
 class ChatInput extends StatefulWidget {
@@ -106,16 +131,15 @@ class ChatInput extends StatefulWidget {
   @override
   State<ChatInput> createState() => _ChatInputState();
 }
-
 class _ChatInputState extends State<ChatInput> {
+  
   String apiKey = "AIzaSyAV_l2AufaBT4lBvl8IWt2-_K9JBMxFnic";
   final FirestoreService firestore = FirestoreService();
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _textController = TextEditingController();
   late final GenerativeModel model;
-
-  @override
-  initState() {
+  
+  @override initState(){
     super.initState();
     model = GenerativeModel(
       model: 'gemini-1.5-flash-latest',
@@ -123,41 +147,8 @@ class _ChatInputState extends State<ChatInput> {
     );
   }
 
-  void _scrollToBottom() {
-    Future.delayed(const Duration(milliseconds: 100), () {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    });
-  }
 
-  Future<void> talkWithGemini(String userInput) async {
-    final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
-
-    final content = Content.text(userInput);
-
-    final response = await model.generateContent([content]);
-    final textResponse = response.text ?? "No response";
-
-    setState(() {
-      final messageID = FirestoreService().getNewMessageID();
-      final ChatMessage message = ChatMessage(
-          id: messageID,
-          userId: "1",
-          billId: widget.bill.billId,
-          text: textResponse,
-          isFromUser: false,
-          timestamp: DateTime.now());
-      firestore.sendMessage(message);
-      MessageService().sendMessage(message);
-    });
-
-    _scrollToBottom();
-  }
-
-  Widget build(BuildContext context) {
+ Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
       decoration: BoxDecoration(
@@ -202,7 +193,7 @@ class _ChatInputState extends State<ChatInput> {
                   setState(() async {
                     //send new message object to list of messages in ChatContainer
                     _sendMessage(true, _textController.text);
-                    _textController.clear();
+                   _textController.clear();
                   });
 
                   // Auto-scroll to the bottom
@@ -221,6 +212,36 @@ class _ChatInputState extends State<ChatInput> {
       ),
     );
   }
+  void _sendMessage(bool isUser, String text) {
+    final messageID = FirestoreService().getNewMessageID();
+    final ChatMessage message = ChatMessage(id: messageID, userId: "1", billId: widget.bill.billId, text: text, isFromUser: isUser, timestamp: DateTime.now());
+    firestore.sendMessage(message);
+    MessageService().sendMessage(message);
+    talkWithGemini(text);
+  }
+
+  Future<void> talkWithGemini(String userInput) async {
+    final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
+
+    final content = Content.text(userInput);
+
+    final response = await model.generateContent([content]);
+    final textResponse = response.text ?? "No response";
+
+    setState(() {
+      final messageID = FirestoreService().getNewMessageID();
+      final ChatMessage message = ChatMessage(
+          id: messageID,
+          userId: "1",
+          billId: widget.bill.billId,
+          text: textResponse,
+          isFromUser: false,
+          timestamp: DateTime.now());
+      firestore.sendMessage(message);
+      MessageService().sendMessage(message);
+    });
+    print("finish talk");
+  }
 
   @override
   void dispose() {
@@ -229,16 +250,6 @@ class _ChatInputState extends State<ChatInput> {
     super.dispose();
   }
 
-  void _sendMessage(bool isUser, String text) {
-    final messageID = FirestoreService().getNewMessageID();
-    final ChatMessage message = ChatMessage(
-        id: messageID,
-        userId: "1",
-        billId: widget.bill.billId,
-        text: text,
-        isFromUser: isUser,
-        timestamp: DateTime.now());
-    FirestoreService().sendMessage(message);
-    MessageService().sendMessage(message);
-  }
+  
+
 }
