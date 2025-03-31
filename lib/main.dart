@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tracklaw/src/homescreen.dart';
-import 'package:tracklaw/models.dart';
+import 'package:tracklaw/APIs/congressAPI.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 

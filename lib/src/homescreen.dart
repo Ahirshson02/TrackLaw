@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:tracklaw/models.dart';
+import 'package:tracklaw/main.dart';
+import 'package:tracklaw/APIs/congressAPI.dart';
+import 'package:tracklaw/src/legistlationPage.dart';
 
 class Homescreen extends StatefulWidget{
   final List<Bill> bills;
@@ -145,19 +147,23 @@ class _HomescreenState extends State<Homescreen>{
                 itemBuilder: (context, index) {
                   final bill = widget.bills[index];
                   final actions = widget.actions[bill.billId] ?? []; // Default to empty list if null
-                        print("bills length is ${widget.bills.length}");
-                        print("bill ID: ${bill.billId}");
-                        print("actions for this bill: $actions");
-                        print("actions is empty? ${actions.isEmpty}");
-                        print("length = ${actions.length}");
-                        
-                        final mostRecentAction = actions.isNotEmpty && actions.length > 0 
-                            ? actions[0] // Or some other safe access
+                        // print("bills length is ${widget.bills.length}");
+                        // print("bill ID: ${bill.billId}");
+                        // print("actions for this bill: ${actions.last.type}");
+                        // print("actions is empty? ${actions.isEmpty}");
+                        // print("length = ${actions.length}");
+                        actions.first.printBillAction();
+                        print("--------------------------------");
+                        print("last action: actions size: ${actions.length}");
+                        actions.last.printBillAction();
+                        var mostRecentAction = (actions.isNotEmpty && actions.length > 0) 
+                            ? actions.first // Or some other safe access
                             : null;
+                        mostRecentAction?.committees = actions.first.committees;
 
                   return BillCard(
                     bill: bill,
-                    action: mostRecentAction, // Pass null if no summaries exist
+                    action: mostRecentAction!, // Pass null if no summaries exist
                   );
                 },
                 separatorBuilder: (context, index){
@@ -173,7 +179,7 @@ class _HomescreenState extends State<Homescreen>{
 }
 class BillCard extends StatefulWidget {
   final Bill bill;
-  final BillActions? action;
+  final BillActions action;
   // final String title;
   // final String status;
   // final String sponsor;
@@ -183,7 +189,7 @@ class BillCard extends StatefulWidget {
   const BillCard({
     Key? key,
     required this.bill,
-    this.action,
+    required this.action,
     // required this.title,
     // required this.status,
     // required this.sponsor,
@@ -198,6 +204,7 @@ class BillCard extends StatefulWidget {
 class _BillCardState extends State<BillCard> {
   String? actionStatus;
   String? committee;
+  String? date;
   @override
   void initState() {
     super.initState();
@@ -207,9 +214,9 @@ class _BillCardState extends State<BillCard> {
       return;
     }
     actionStatus = widget.action?.type ?? "Progress Not Yet Set";
-    committee = widget.action?.committees?[0].name ?? "No committee";
-    print("Committie size: ${widget.action?.committees?.length ?? "null"}");
     actionStatus = splitCamelCase(actionStatus!); // Returns "Intro Referral"
+    committee = widget.action?.committees?[0].name ?? "No committee";
+    date = widget.action?.actionDate;
   }
 
   @override
@@ -220,10 +227,16 @@ class _BillCardState extends State<BillCard> {
   @override
   Widget build(BuildContext context) {
     
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+          backgroundColor: Color.fromARGB(255, 236, 189, 142),       // Button background color
+          //foregroundColor: Colors.white,      // Text/icon color
+          minimumSize: Size(150, 40),         // Set specific width and height
+          padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: BorderSide(color: Colors.black, width: 2),
+          ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -240,25 +253,36 @@ class _BillCardState extends State<BillCard> {
                overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 8),
-            Text(
-              "Status: ${actionStatus ?? "no stat"}",
+            DefaultTextStyle(
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 16,
                 color: Colors.grey[700],
-                ),
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 8),
+              child: Row(
+                children: [
+                  Text("Status: ${actionStatus ?? "Unknown"}"),
+                  Text(" | ", style: TextStyle(fontSize: 20)),
+                  Text(date ?? "Date Missing"),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
             Text(
-              "Committee: ${committee ?? "no com"}",
+              "Committee: ${committee ?? "Unknown"}",
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 16,
                 color: Colors.grey[700],
+                fontWeight: FontWeight.bold
               ),
             ),
             const SizedBox(height: 16),
           ],
         ),
       ),
+      onPressed: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => LegistlationPage(bill: widget.bill, action: widget.action)),);
+      },
     );
   }
   

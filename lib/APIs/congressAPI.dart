@@ -1,10 +1,9 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:xml/xml.dart';
 
 
 //---- FOR RESULTS OF https://api.congress.gov/#/bill/bill_list_all ----
+
 // Model classes
 class CongressApiService {
   final String apiKey = "UEhogD6IZQBLsUcJynMpOiZ5cPsvLwvwsAuXlRDe";
@@ -30,6 +29,7 @@ class CongressApiService {
     print("In getBillActions");
     billType = billType.toLowerCase(); //billType must be lowercase
     final url = '$baseUrl/bill/$congress/$billType/$billNumber/actions?api_key=$apiKey&format=json';
+    print("getBillActions URL: $url");
      final response = await http.get(Uri.parse(url));
     //else if code == 404, put summary as null/default values
     if (response.statusCode == 200) {
@@ -87,26 +87,18 @@ class CongressApiService {
       return emptyList;
     }
   }
-  
-  // Convenience method to get a bill with its summaries
-  Future<BillWithSummaries> getBillWithSummaries(int congress, String billType, String billNumber) async {
-    final bill = await getBill(congress, billType, billNumber);
-    final summaries = await getBillSummaries(congress, billType, billNumber);
-    
-    return BillWithSummaries(bill: bill, summaries: summaries);
-  }
-  
+
   // Search bills to find bills of interest
   //originall of 
   Future<List<Bill>> searchBills({
     int? congress,
     String? billType,
     int offset = 0,
-    int limit = 3,
+    int limit = 1,
   }) async {
     String url = '$baseUrl/bill?api_key=$apiKey&offset=$offset&limit=$limit&format=json&fromDateTime=2024-01-01T12:30:30Z&toDateTime=2025-03-01T12:30:30Z';
     //&fromDateTime=2022-01-01T12:30:30Z&toDateTime=2024-01-01T12:30:30Z
-    
+    print("searchBills URL: $url");
     if (congress != null) url += '&congress=$congress';
     if (billType != null) url += '&billType=$billType';
     print("==== awaiting searchBills.response ====");
@@ -121,42 +113,6 @@ class CongressApiService {
     }
   }
 }
-
-// Model class for bill search results (simplified)
-class BillSearchResult {
-  final int congress;
-  final String billType;
-  final String billNumber;
-  final String title;
-  final String updateDate;
-  
-  BillSearchResult({
-    required this.congress,
-    required this.billType,
-    required this.billNumber,
-    required this.title,
-    required this.updateDate,
-  });
-  
-  factory BillSearchResult.fromJson(Map<String, dynamic> json) {
-    return BillSearchResult(
-      congress: json['congress'],
-      billType: json['type'],
-      billNumber: json['number'],
-      title: json['title'],
-      updateDate: json['updateDate'],
-    );
-  }
-  
-  // Helper method to get the unique identifier for this bill
-  String get billId => '$congress-$billType-$billNumber';
-  
-  @override
-  String toString() {
-    return '$billType $billNumber ($congress): $title';
-  }
-}
-
 // Detailed bill model
 class Bill {
   final int? congress;
@@ -168,9 +124,6 @@ class Bill {
   final String? billType;
   final String? introducedDate;
   final String? urlForMore;
-  final List<Sponsor>? sponsors;
-  final List<Cosponsors>? cosponsors;
-  final List<PolicyArea>? policyAreas;
   final String? updateDate;
   
   Bill({
@@ -179,10 +132,7 @@ class Bill {
      this.billNumber,
      this.title,
      this.introducedDate,
-     this.sponsors,
-     this.cosponsors,
      this.latestAction,
-     this.policyAreas,
      this.updateDate,
      this.chamberCode,
      this.originChamber,
@@ -190,33 +140,6 @@ class Bill {
   });
   
   factory Bill.fromJson(Map<String, dynamic> json) {
-    // Extract sponsors
-   // List<Sponsor> sponsors = [];
-    // if (json['sponsors'] != null) {
-    //   sponsors = (json['sponsors']['item'] as List)
-    //       .map((sponsor) => Sponsor.fromJson(sponsor))
-    //       .toList();
-    // }
-    
-    // Extract cosponsors
-    // List<Cosponsors> cosponsors = [];
-    // if (json['cosponsors'] != null && json['cosponsors']['count'] > 0) {
-    //   cosponsors = (json['cosponsors']['item'] as List)
-    //       .map((cosponsor) => Cosponsors.fromJson(cosponsor))
-    //       .toList();
-    // }
-    
-    // Extract policy areas
-    // List<PolicyArea> policyAreas = [];
-    // if (json['policyArea'] != null) {
-    //   if (json['policyArea'] is List) {
-    //     policyAreas = (json['policyArea'] as List)
-    //         .map((area) => PolicyArea.fromJson(area))
-    //         .toList();
-    //   } else {
-    //     policyAreas = [PolicyArea.fromJson(json['policyArea'])];
-    //   }
-    // }
     Bill? bill = null;
     try{
       bill = Bill(
@@ -226,11 +149,7 @@ class Bill {
       billType: json['type'],
       billNumber: json['number'],
       title: json['title'],
-      //introducedDate: json['introducedDate'],
-     // sponsors: sponsors,
-      //cosponsors: cosponsors,
       latestAction: LatestAction.fromJson(json['latestAction']),
-      //policyAreas: policyAreas,
       updateDate: json['updateDate'],
       urlForMore: json['url'],
     );
@@ -240,59 +159,25 @@ class Bill {
     }
     return bill!;
   }
+  Map<String, dynamic> toJson() {
+  return {
+    'congress': congress,
+    'latestAction': latestAction, // Assuming LatestAction has a toJson method
+    'billNumber': billNumber,
+    'originChamber': originChamber,
+    'chamberCode': chamberCode,
+    'title': title,
+    'billType': billType,
+    'introducedDate': introducedDate,
+    'urlForMore': urlForMore,
+    'updateDate': updateDate,
+  };
+}
   
   // Helper method to get the unique identifier for this bill
   String get billId => '$congress-$billType-$billNumber';
 }
 
-class Sponsor {
-  final String name;
-  final String bioguideId;
-  final String state;
-  final String party;
-  
-  Sponsor({
-    required this.name,
-    required this.bioguideId,
-    required this.state,
-    required this.party,
-  });
-  
-  factory Sponsor.fromJson(Map<String, dynamic> json) {
-    return Sponsor(
-      name: json['name'],
-      bioguideId: json['bioguideId'],
-      state: json['state'],
-      party: json['party'],
-    );
-  }
-}
-
-class Cosponsors {
-  final String name;
-  final String bioguideId;
-  final String state;
-  final String party;
-  final String sponsorshipDate;
-  
-  Cosponsors({
-    required this.name,
-    required this.bioguideId,
-    required this.state,
-    required this.party,
-    required this.sponsorshipDate,
-  });
-  
-  factory Cosponsors.fromJson(Map<String, dynamic> json) {
-    return Cosponsors(
-      name: json['name'],
-      bioguideId: json['bioguideId'],
-      state: json['state'],
-      party: json['party'],
-      sponsorshipDate: json['sponsorshipDate'],
-    );
-  }
-}
 
 class LatestAction {
   final String actionDate;
@@ -318,20 +203,11 @@ class LatestAction {
   }
 }
 
-class PolicyArea {
-  final String name;
-  
-  PolicyArea({required this.name});
-  
-  factory PolicyArea.fromJson(Map<String, dynamic> json) {
-    return PolicyArea(name: json['name']);
-  }
-}
 
 class BillActions {
   final String? actionCode;
   final String actionDate;
-  final List<Committee>? committees;
+  List<Committee>? committees; //not made final each bill's most recent action lacks a committee value. Last action's committee is set to the first's
   final String text;
   final String type;
 
@@ -354,6 +230,15 @@ class BillActions {
       text: json['text'],
       type: json['type'],
     );
+  }
+  printBillAction(){
+    print("action code: ${actionCode ?? "No code"}, actionDate: $actionDate");
+    if(committees != null){
+      for(Committee c in committees!){
+        c.printCommittee();
+      }
+    }
+    print("text: $text, type: $type");
   }
 }
 
@@ -383,24 +268,27 @@ class Committee {
       'url': url,
     };
   }
+  printCommittee(){
+    print("Committee: $name");
+  }
 }
 
 // Bill Summary class
 class BillSummary {
   //final String name;
-  final String updateDate;
-  final String actionDate;
-  final String actionDesc;
-  final String text;
-  final String versionCode;
+  final String? updateDate;
+  final String? actionDate;
+  final String? actionDesc;
+  final String? text;
+  final String? versionCode;
   
   BillSummary({
     //required this.name,
-    required this.updateDate,
-    required this.actionDate,
-    required this.actionDesc,
-    required this.text,
-    required this.versionCode,
+     this.updateDate,
+     this.actionDate,
+     this.actionDesc,
+     this.text,
+     this.versionCode,
   });
   
   factory BillSummary.fromJson(Map<String, dynamic> json) {
@@ -415,22 +303,6 @@ class BillSummary {
   }
 }
 
-// Combined class for a bill with its summaries
-class BillWithSummaries {
-  final Bill bill;
-  final List<BillSummary> summaries;
-  
-  BillWithSummaries({
-    required this.bill,
-    required this.summaries,
-  });
-  
-  // Get the latest summary if available
-  BillSummary? get latestSummary {
-    if (summaries.isEmpty) return null;
-    return summaries.reduce((a, b) => 
-      int.parse(a.versionCode) > int.parse(b.versionCode) ? a : b);
-  }
-}
+
 //---- END RESULTS OF https://api.congress.gov/#/bill/bill_list_all
 
