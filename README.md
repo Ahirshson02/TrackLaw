@@ -40,6 +40,6 @@ Some features are shown but not completed, such as the search bar, filter and so
 Mobile App project for Code Crunch 305 Hackathon
 
  ## Contributions: 
-<p>Matthew Quintero: On our tracklaw app, I helped our doing the user data base and login/register/opening page. I used databases like<a href = 'https://firebase.google.com/'> Firebase </a>  In order to keep log of who register's and who logs in. I also helped in our production of Google gemini. </p>
+<h3>Hi my name is Matthew Quintero!</h3> <p>On our tracklaw app, I helped our doing the user data base and login/register/opening page. I used databases like<a href = 'https://firebase.google.com/'> Firebase </a>  In order to keep log of who register's and who logs in. I also helped in our production of Google gemini. </p>
 
 
