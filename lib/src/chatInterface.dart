@@ -130,7 +130,6 @@ class ChatInput extends StatefulWidget {
   @override
   State<ChatInput> createState() => _ChatInputState();
 }
-
 class _ChatInputState extends State<ChatInput> {
   
   String apiKey = "AIzaSyAV_l2AufaBT4lBvl8IWt2-_K9JBMxFnic";
@@ -217,7 +216,32 @@ class _ChatInputState extends State<ChatInput> {
     final ChatMessage message = ChatMessage(id: messageID, userId: "1", billId: widget.bill.billId, text: text, isFromUser: isUser, timestamp: DateTime.now());
     firestore.sendMessage(message);
     MessageService().sendMessage(message);
+    talkWithGemini(text);
   }
+
+  Future<void> talkWithGemini(String userInput) async {
+    final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
+
+    final content = Content.text(userInput);
+
+    final response = await model.generateContent([content]);
+    final textResponse = response.text ?? "No response";
+
+    setState(() {
+      final messageID = FirestoreService().getNewMessageID();
+      final ChatMessage message = ChatMessage(
+          id: messageID,
+          userId: "1",
+          billId: widget.bill.billId,
+          text: textResponse,
+          isFromUser: false,
+          timestamp: DateTime.now());
+      firestore.sendMessage(message);
+      MessageService().sendMessage(message);
+    });
+    print("finish talk");
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();

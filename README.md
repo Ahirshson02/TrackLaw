@@ -1,26 +1,32 @@
-# tracklaw
+##  TrackLaw
 
-A new Flutter project.
+TrackLaw puts the law in front of the people. Using publically available data from Congress, TrackLaw displays current legislation currently being discussed and passed through Congress, as well as its status and who is in charge of it. TrackLaw provides a summary of the bill so that users can get an overview, but also have the option to open of the bill and read it for themselves. The goal of TrackLaw is to put the law in the hands of the people, so that they can review it and form their own opinions, without the risk of media biases.
 
 ## Getting Started
 
 This project is a starting point for a Flutter application that follows the
 Download the Flutter SDK, should use close to Flutter version 3.27.3, and close to Dart 3.6.1
 
-## Assets
+Clone the GitHub repo into your local IDE
 
-The `assets` directory houses images, fonts, and any other files you want to
-include with your application.
+If "flutter pub get" does not run automatically, run the command.
 
-The `assets/images` directory contains [resolution-aware
-images](https://flutter.dev/to/resolution-aware-images).
 
-## Localization
+## Functionality
 
-This project generates localized messages based on arb files found in
-the `lib/src/localization` directory.
+App opens to a landing page that directs users to either sign in or sign up pages, which in turn utilzie Firebase Authentication.
+Once signed in, the user is shown a list of bills currently going through the U.S. Congress, as well as some preliminary info about them, such as
+title, status, the committee working with it, and how recently its been discussed. Also on this home page is a user icon that opens a drawer for the user to sign out.
+The user can tap on a bill card, and are directed to a new screen with more info on the selected bill, such as a summary, the option to read it for themselves in a file viewer,
+and a chatbot to ask questions about the bill, powered by Google Gemini.
 
-To support additional languages, please visit the tutorial on
-[Internationalizing Flutter apps](https://flutter.dev/to/internationalization).
+Some features are shown but not completed, such as the search bar, filter and sort buttons, and saved bills page.
+
+## Technologies Used
+Language: Dart
+Framework: Flutter
+User Auth: Firebase Authentication
+APIs: U.S. Congress, Firebase, Google Gemini
+AI Chatbot: Google Gemini
 
 Mobile App project for Code Crunch 305 Hackathon

@@ -189,10 +189,9 @@ class FirestoreService {
     final messageId = message.id.isEmpty 
         ? _messagesCollection.doc().id 
         : message.id;
-
-    
     await _messagesCollection.doc(messageId).set(message.toMap());
   }
+  
   String getNewMessageID(){
     final id = _messagesCollection.doc().id;
     return id;
