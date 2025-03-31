@@ -88,6 +88,23 @@ class CongressApiService {
     }
   }
 
+  Future<BillData> getBillFiles(
+    int congress,
+    String billType,
+    String billNumber,
+    
+  ) async{
+    String url = '$baseUrl/bill/$congress/$billType/$billNumber/text?api_key=$apiKey&format=json';
+
+    final response = await http.get(Uri.parse(url));
+    //else if code == 404, put summary as null/default values
+ 
+    if (response.statusCode == 200) {
+      return BillData.fromJson(response.body);
+    } else {
+      throw Exception('Failed to load bill data: ${response.statusCode} ${response.reasonPhrase}');
+    }
+  }
   // Search bills to find bills of interest
   //originall of 
   Future<List<Bill>> searchBills({
@@ -325,6 +342,111 @@ class BillSummary {
   }
 }
 
+class BillFormat {
+  final String type;
+  final String url;
+
+  BillFormat({required this.type, required this.url});
+
+  factory BillFormat.fromJson(Map<String, dynamic> json) {
+    return BillFormat(
+      type: json['type'] as String,
+      url: json['url'] as String,
+    );
+  }
+
+  @override
+  String toString() => '$type: $url';
+}
+
+class BillVersion {
+  final String type;
+  final DateTime? date;
+  final List<BillFormat> formats;
+
+  BillVersion({required this.type, this.date, required this.formats});
+
+  factory BillVersion.fromJson(Map<String, dynamic> json) {
+    return BillVersion(
+      type: json['type'] as String,
+      date: json['date'] != null ? DateTime.parse(json['date']) : null,
+      formats: (json['formats'] as List<dynamic>)
+          .map((format) => BillFormat.fromJson(format as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  BillFormat? getFormatByType(String formatType) {
+    for (var format in formats) {
+      if (format.type == formatType) {
+        return format;
+      }
+    }
+    return null;
+  }
+
+  @override
+  String toString() {
+    String dateStr = date != null ? date!.toIso8601String() : 'No date';
+    return '$type ($dateStr)';
+  }
+}
+
+class BillData {
+  final String billNumber;
+  final String billType;
+  final String congress;
+  final List<BillVersion> textVersions;
+
+  BillData({
+    required this.billNumber,
+    required this.billType,
+    required this.congress,
+    required this.textVersions,
+  });
+
+  factory BillData.fromJson(String jsonStr) {
+    final json = jsonDecode(jsonStr) as Map<String, dynamic>;
+    final request = json['request'] as Map<String, dynamic>;
+    
+    return BillData(
+      billNumber: request['billNumber'] as String,
+      billType: request['billType'] as String,
+      congress: request['congress'] as String,
+      textVersions: (json['textVersions'] as List<dynamic>)
+          .map((version) => BillVersion.fromJson(version as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  BillVersion? getLatestVersion() {
+    // Filter versions with dates
+    var datedVersions = textVersions.where((version) => version.date != null).toList();
+    
+    if (datedVersions.isEmpty) {
+      return null;
+    }
+    
+    // Sort by date in descending order
+    datedVersions.sort((a, b) => b.date!.compareTo(a.date!));
+    
+    return datedVersions.first;
+  }
+
+  BillFormat? getLatestPdfFormat() {
+    final latestVersion = getLatestVersion();
+    if (latestVersion == null) {
+      return null;
+    }
+    
+    return latestVersion.getFormatByType('PDF');
+  }
+
+  @override
+  String toString() {
+    return 'Bill $billNumber ($billType) from Congress $congress';
+  }
+}
 
 //---- END RESULTS OF https://api.congress.gov/#/bill/bill_list_all
 

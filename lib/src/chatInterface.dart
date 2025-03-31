@@ -1,10 +1,12 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:tracklaw/src/messageService.dart';
 import "/APIs/firebaseAPI.dart";
 import '/APIs/congressAPI.dart';
 import 'legistlationPage.dart';
+
+
 class ChatContainer extends StatefulWidget {
   List<ChatMessage> messages;
   final Bill bill;
@@ -130,10 +132,20 @@ class ChatInput extends StatefulWidget {
 }
 
 class _ChatInputState extends State<ChatInput> {
-
+  
+  String apiKey = "AIzaSyAV_l2AufaBT4lBvl8IWt2-_K9JBMxFnic";
   final FirestoreService firestore = FirestoreService();
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _textController = TextEditingController();
+  late final GenerativeModel model;
+  
+  @override initState(){
+    super.initState();
+    model = GenerativeModel(
+      model: 'gemini-1.5-flash-latest',
+      apiKey: apiKey,
+    );
+  }
 
 
  Widget build(BuildContext context) {
@@ -212,4 +224,7 @@ class _ChatInputState extends State<ChatInput> {
     _textController.dispose();
     super.dispose();
   }
+
+  
+
 }

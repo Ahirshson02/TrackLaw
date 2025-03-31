@@ -163,6 +163,10 @@ class _LegislationPageState extends State<LegistlationPage>{
       });
     }
   }
+  Future<void> getFiles(Bill bill) async{
+    BillData billData = await congressAPI.getBillFiles(bill.congress!, bill.billType!, bill.billNumber!);
+    BillFormat? latestBill = billData.getLatestPdfFormat();
+  }
 
   downLoadFile(File file){
 
