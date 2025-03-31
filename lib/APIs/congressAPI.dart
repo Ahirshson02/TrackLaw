@@ -33,7 +33,7 @@ class CongressApiService {
      final response = await http.get(Uri.parse(url));
     //else if code == 404, put summary as null/default values
     if (response.statusCode == 200) {
-      print("========= status code == 200");
+      print("========= getbillACtions: status code == 200");
       final data = json.decode(response.body);
       
       // Check if summaries exist
@@ -94,7 +94,7 @@ class CongressApiService {
     int? congress,
     String? billType,
     int offset = 0,
-    int limit = 1,
+    int limit = 50,
   }) async {
     String url = '$baseUrl/bill?api_key=$apiKey&offset=$offset&limit=$limit&format=json&fromDateTime=2024-01-01T12:30:30Z&toDateTime=2025-03-01T12:30:30Z';
     //&fromDateTime=2022-01-01T12:30:30Z&toDateTime=2024-01-01T12:30:30Z
@@ -162,7 +162,7 @@ class Bill {
   Map<String, dynamic> toJson() {
   return {
     'congress': congress,
-    //'latestAction': latestAction, // Assuming LatestAction has a toJson method
+    'latestAction': latestAction, // Assuming LatestAction has a toJson method
     'billNumber': billNumber,
     'originChamber': originChamber,
     'chamberCode': chamberCode,
@@ -201,15 +201,21 @@ class LatestAction {
     }
    return latestAction!; 
   }
+  Map<String, dynamic> toJson() {
+  return {
+    'actionDate': actionDate,
+    'text': text,
+  };
+}
 }
 
 
 class BillActions {
   final String? actionCode;
-  final String actionDate;
+  final String? actionDate;
   List<Committee>? committees; //not made final each bill's most recent action lacks a committee value. Last action's committee is set to the first's
-  final String text;
-  final String type;
+  final String? text;
+  final String? type;
 
   BillActions({
     this.actionCode,
@@ -220,7 +226,13 @@ class BillActions {
   });
 
   factory BillActions.fromJson(Map<String, dynamic> json) {
-    return BillActions(
+    try{
+      print("${json['actionCode'] ?? "a"}");
+      print("${json['actionDate'] ?? "b"}");
+      print("${json['committees'] ?? "c"}");
+      print("${json['text'] ?? "d"}");
+      print("${json['type'] ?? "e"}");
+      return BillActions(
       actionCode: json['actionCode'],
       actionDate: json['actionDate'],
       committees: json['committees'] != null
@@ -230,6 +242,16 @@ class BillActions {
       text: json['text'],
       type: json['type'],
     );
+    
+    }catch(e){
+      print("ERROR IN FROMJSON: $e");
+      print("${json['actionCode'] ?? "a"}");
+      print("${json['actionDate'] ?? "b"}");
+      print("${json['committees'] ?? "c"}");
+      print("${json['text'] ?? "d"}");
+      print("${json['type'] ?? "e"}");
+    }
+    return BillActions(actionDate: "a", text: "a", type: "a", committees: [], actionCode: "a");
   }
   printBillAction(){
     print("action code: ${actionCode ?? "No code"}, actionDate: $actionDate");
@@ -269,7 +291,7 @@ class Committee {
     };
   }
   printCommittee(){
-    print("Committee: $name");
+    print("Committee: ${name ?? "no name ERROROEROROE"}");
   }
 }
 

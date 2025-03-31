@@ -22,8 +22,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginPage(),// Show a loading screen first
+      home: openingPage(),// Show a loading screen first
     );
   }
 }
-

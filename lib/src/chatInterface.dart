@@ -1,28 +1,51 @@
-import 'package:flutter/material.dart';
-import "/APIs/firebaseAPI.dart";
+import 'dart:async';
 
-class ChatContainer extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:tracklaw/src/messageService.dart';
+import "/APIs/firebaseAPI.dart";
+import '/APIs/congressAPI.dart';
+import 'legistlationPage.dart';
+class ChatContainer extends StatefulWidget {
   List<ChatMessage> messages;
-  final ScrollController? scrollController;
-  
+  final Bill bill;
    ChatContainer({
     Key? key, 
     required this.messages,
-    this.scrollController,
+    required this.bill,
+    //this.scrollController,
   }) : super(key: key);
+
+State<ChatContainer> createState() => _ChatContainer();
+}
+class _ChatContainer extends State<ChatContainer>{
+  final ScrollController? scrollController = ScrollController();
+  late StreamSubscription<ChatMessage> _subscription;
+ 
+  @override
+void initState() {
+  super.initState();
+  _subscription = MessageService().messageStream.listen((message) {
+    setState(() {
+      widget.messages.add(message);
+    });
+  });
+}
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 300,
+      constraints: BoxConstraints(
+        minHeight: 50,
+        maxHeight: 300,
+      ),
       decoration: BoxDecoration(
         color: Colors.grey[100],
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black,
             blurRadius: 10,
-            spreadRadius: 1,
+            spreadRadius: 0.5,
           ),
         ],
       ),
@@ -32,10 +55,11 @@ class ChatContainer extends StatelessWidget {
         child: ListView.builder(
           controller: scrollController,
           padding: const EdgeInsets.all(12),
-          itemCount: messages.length,
+          itemCount: widget.messages.length,
           physics: const BouncingScrollPhysics(),
+          shrinkWrap: true,
           itemBuilder: (context, index) {
-            final message = messages[index];
+            final message = widget.messages[index];
             return MessageBubble(
               message: message.text,
               isUser: message.isFromUser,
@@ -93,43 +117,33 @@ class MessageBubble extends StatelessWidget {
       ),
     );
   }
+
+  
 }
 
-// Model for chat messages
-// class ChatMessage {
-//   final String text;
-//   final bool isFromUser;
-//   final DateTime timestamp;
-
-//   ChatMessage({
-//     required this.text,
-//     required this.isFromUser,
-//     DateTime? timestamp,
-//   }) : timestamp = timestamp ?? DateTime.now();
-// }
-
-// Example usage
 class ChatInput extends StatefulWidget {
-  const ChatInput({Key? key}) : super(key: key);
+  final Bill bill;
+  const ChatInput({Key? key, required this.bill}) : super(key: key);
 
   @override
   State<ChatInput> createState() => _ChatInputState();
 }
 
 class _ChatInputState extends State<ChatInput> {
- 
+
+  final FirestoreService firestore = FirestoreService();
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _textController = TextEditingController();
 
 
-  Widget build(BuildContext context) {
+ Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black,
             offset: const Offset(0, -1),
             blurRadius: 5,
           ),
@@ -164,8 +178,9 @@ class _ChatInputState extends State<ChatInput> {
               onPressed: () {
                 // Send message logic
                 if (_textController.text.trim().isNotEmpty) {
-                  setState(() {
+                  setState(() async {
                     //send new message object to list of messages in ChatContainer
+                    _sendMessage();
                    _textController.clear();
                   });
                   
@@ -185,7 +200,12 @@ class _ChatInputState extends State<ChatInput> {
       ),
     );
   }
-
+  void _sendMessage() {
+    final messageID = FirestoreService().getNewMessageID();
+    final ChatMessage message = ChatMessage(id: messageID, userId: "1", billId: widget.bill.billId, text: _textController.text, isFromUser: true, timestamp: DateTime.now());
+    firestore.sendMessage(message);
+    MessageService().sendMessage(message);
+  }
   @override
   void dispose() {
     _scrollController.dispose();

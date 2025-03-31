@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -25,6 +26,8 @@ class _LegislationPageState extends State<LegistlationPage>{
   BillSummary? summary = BillSummary(); //create empty summary
   bool isLoading = true;
 
+  final StreamController<ChatMessage> messageController = StreamController<ChatMessage>.broadcast();
+
   //ChatBox Data
     //Set up Firebase Cloud store API - select * from chathistory where userID = User.id AND billID = widget.bill.billID
     final List<ChatMessage> _messages = [
@@ -35,55 +38,7 @@ class _LegislationPageState extends State<LegistlationPage>{
       text: "Hello! How can I help you today?",
       isFromUser: false,
       timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
-    ),
-     ChatMessage(
-      id: "1",
-      userId: "1",
-      billId: "1",
-      text: "Hello! How can I help you today?",
-      isFromUser: false,
-      timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
-    ),
-     ChatMessage(
-      id: "1",
-      userId: "1",
-      billId: "1",
-      text: "Hello! How can I help you today?",
-      isFromUser: false,
-      timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
-    ),
-     ChatMessage(
-      id: "1",
-      userId: "1",
-      billId: "1",
-      text: "Hello! How can I help you today?",
-      isFromUser: false,
-      timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
-    ),
-     ChatMessage(
-      id: "1",
-      userId: "1",
-      billId: "1",
-      text: "Hello! How can I help you today?",
-      isFromUser: false,
-      timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
-    ),
-    ChatMessage(
-      id: "2",
-      userId: "1",
-      billId: "1",
-      text: "I need information about tttt ttttt ttttt ttttt tttt ttt ttt ttt ttt tttt tttt tttttt ttttttt tttttt tttttt ttttt tttt tttt tttttt ttt tt  tttttt tttttt  ttttttttttt ttttt tttttttt ttt tttt ttttttt tt tttt tttt t ttttt tttt tttttt ttt ttttttttt ttttttttttttt tt tttt ttttttt tt tttttt   tttttttttttttttttttttttt your services.",
-      isFromUser: true,
-      timestamp: DateTime.now().subtract(const Duration(minutes: 4)),
-    ),
-    ChatMessage(
-      id: "3",
-      userId: "1",
-      billId: "1",
-      text: "Sure, I'd be happy to tell you about our services. We offer...",
-      isFromUser: false,
-      timestamp: DateTime.now().subtract(const Duration(minutes: 3)),
-    ),
+    )
   ];
 
   @override
@@ -104,7 +59,7 @@ class _LegislationPageState extends State<LegistlationPage>{
         appBar: AppBar(
           backgroundColor: Color.fromARGB(255, 212, 163, 115),
           foregroundColor: Colors.white,
-          title: Text("Bill ${widget.bill.billNumber}"),
+          //title: Text("Bill ${widget.bill.billNumber}"),
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
@@ -177,9 +132,9 @@ class _LegislationPageState extends State<LegistlationPage>{
                     ],
                    ),
                   const SizedBox(height: 8),
-                  ChatContainer(messages: _messages),
+                  ChatContainer(messages: _messages, bill: widget.bill),
                   const SizedBox(height: 8),
-                  ChatInput()
+                  ChatInput(bill: widget.bill)
               ],
             ),
           ),

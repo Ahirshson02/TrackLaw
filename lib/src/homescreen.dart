@@ -159,16 +159,17 @@ class _HomescreenState extends State<Homescreen>{
                         // print("length = ${actions.length}");
                         actions.first.printBillAction();
                         print("--------------------------------");
-                        print("last action: actions size: ${actions.length}");
+                       // print("last action: actions size: ${actions.length}");
                         actions.last.printBillAction();
                         var mostRecentAction = (actions.isNotEmpty && actions.length > 0) 
                             ? actions.first // Or some other safe access
                             : null;
-                        mostRecentAction?.committees = actions.first.committees;
-
+    
+                        mostRecentAction?.committees = actions.first.committees ?? [];
+                        
                   return BillCard(
                     bill: bill,
-                    action: mostRecentAction!, // Pass null if no summaries exist
+                    action: mostRecentAction ?? BillActions(actionDate: "a", text: "a", type: "a", committees: [], actionCode: "a"), // Pass null if no summaries exist
                   );
                 },
                 separatorBuilder: (context, index){
@@ -185,25 +186,15 @@ class _HomescreenState extends State<Homescreen>{
 class BillCard extends StatefulWidget {
   final Bill bill;
   final BillActions action;
-  // final String title;
-  // final String status;
-  // final String sponsor;
-  // final String introduceDate;
-  //final Function(String) onContentChanged;
 
   const BillCard({
     Key? key,
     required this.bill,
     required this.action,
-    // required this.title,
-    // required this.status,
-    // required this.sponsor,
-    // required this.introduceDate,
   }) : super(key: key);
 
   @override
   State<BillCard> createState() => _BillCardState();
-
 }
 
 class _BillCardState extends State<BillCard> {
@@ -214,14 +205,15 @@ class _BillCardState extends State<BillCard> {
   void initState() {
     super.initState();
     print("in billcardstate init");
-    if(widget?.action == null){
-      print("action is null");
-      return;
-    }
-    actionStatus = widget.action?.type ?? "Progress Not Yet Set";
+    actionStatus = widget.action.type ?? "Progress Not Yet Set";
     actionStatus = splitCamelCase(actionStatus!); // Returns "Intro Referral"
-    committee = widget.action?.committees?[0].name ?? "No committee";
-    date = widget.action?.actionDate;
+    if(widget.action.committees!.isEmpty){
+      committee = "No committee listed";
+    }
+    else{
+      committee = widget.action.committees?.first.name ?? "No committee";
+    }
+    date = widget.action.actionDate ?? "d";
   }
 
   @override
@@ -286,9 +278,7 @@ class _BillCardState extends State<BillCard> {
         ),
       ),
       onPressed: () async{
-          final FirestoreService f = FirestoreService();
-          f.saveBill(widget.bill);
-        //Navigator.push(context, MaterialPageRoute(builder: (context) => LegistlationPage(bill: widget.bill, action: widget.action)),);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => LegistlationPage(bill: widget.bill, action: widget.action)),);
       },
     );
   }

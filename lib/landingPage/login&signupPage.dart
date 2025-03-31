@@ -4,14 +4,14 @@ import 'package:tracklaw/landingPage/Squaremaker.dart';
 import 'package:tracklaw/loginPage/loginPage.dart';
 import 'package:tracklaw/registerPage/RegisterNewAccount.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class openingPage extends StatefulWidget {
+  const openingPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<openingPage> createState() => _openingPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _openingPageState extends State<openingPage> {
   // ignore: unused_field
   double _opacity = 0.0;
   @override
@@ -27,6 +27,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
           body: SafeArea(
               child: SingleChildScrollView(

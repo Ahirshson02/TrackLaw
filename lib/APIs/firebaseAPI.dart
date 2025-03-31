@@ -193,6 +193,10 @@ class FirestoreService {
     
     await _messagesCollection.doc(messageId).set(message.toMap());
   }
+  String getNewMessageID(){
+    final id = _messagesCollection.doc().id;
+    return id;
+  }
   
   // Get chat messages for a specific bill
   Future<List<ChatMessage>> getMessagesForBill(String billId, String userId, {int limit = 50}) async {
