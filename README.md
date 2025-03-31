@@ -42,4 +42,4 @@ Mobile App project for Code Crunch 305 Hackathon
  ## Contributions: 
 <h3>Hi my name is Matthew Quintero!</h3> <p>On our tracklaw app, I helped our doing the user data base and login/register/opening page. I used databases like<a href = 'https://firebase.google.com/'> Firebase </a>  In order to keep log of who register's and who logs in. I also helped in our production of Google gemini. </p>
 
-<p>Adam Hirshson: I set up the homescreen once signed in, legislation summary page, chat box, and PDF viewer. To fill these screens, I worked with the U.S. Congress API, our Firebase database, and the Google Gemini API.</p>
+<h3>Adam Hirshson</h3> <p>I set up the homescreen once signed in, legislation summary page, chat box, and PDF viewer. To fill these screens, I worked with the U.S. Congress API, our Firebase database, and the Google Gemini API.</p>
