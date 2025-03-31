@@ -97,7 +97,7 @@ class _openingPageState extends State<openingPage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Squaretile(
-                                      imagePath: '../images/Instagram_icon.jpg'),
+                                      imagePath: 'lib/images/Instagram_icon.jpg'),
                                   SizedBox(width: 60),
                                   Squaretile(imagePath: 'lib/images/X_logo.png'),
                                   SizedBox(width: 60),
