@@ -23,7 +23,7 @@ and a chatbot to ask questions about the bill, powered by Google Gemini.
 Some features are shown but not completed, such as the search bar, filter and sort buttons, and saved bills page.
 
 ## Technologies Used
-Language: Dart
+Language: Dart\n
 Framework: Flutter
 User Auth: Firebase Authentication
 APIs: U.S. Congress, Firebase, Google Gemini
