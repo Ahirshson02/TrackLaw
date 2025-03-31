@@ -192,7 +192,7 @@ class _ChatInputState extends State<ChatInput> {
                 if (_textController.text.trim().isNotEmpty) {
                   setState(() async {
                     //send new message object to list of messages in ChatContainer
-                    _sendMessage();
+                    _sendMessage(true, _textController.text);
                    _textController.clear();
                   });
                   
@@ -212,9 +212,9 @@ class _ChatInputState extends State<ChatInput> {
       ),
     );
   }
-  void _sendMessage() {
+  void _sendMessage(bool isUser, String text) {
     final messageID = FirestoreService().getNewMessageID();
-    final ChatMessage message = ChatMessage(id: messageID, userId: "1", billId: widget.bill.billId, text: _textController.text, isFromUser: true, timestamp: DateTime.now());
+    final ChatMessage message = ChatMessage(id: messageID, userId: "1", billId: widget.bill.billId, text: text, isFromUser: isUser, timestamp: DateTime.now());
     firestore.sendMessage(message);
     MessageService().sendMessage(message);
   }

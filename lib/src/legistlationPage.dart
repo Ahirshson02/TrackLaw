@@ -2,17 +2,24 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:tracklaw/APIs/congressAPI.dart';
 import 'package:tracklaw/landingPage/loadingScreen.dart';
 import 'package:tracklaw/src/chatInterface.dart';
+import 'package:tracklaw/src/pdfViewer.dart';
 import 'homescreen.dart';
 import '/main.dart';
 import '/APIs/firebaseAPI.dart';
+import 'package:http/http.dart' as http;
+import 'package:html/parser.dart' as htmlparser; // For simple parsing
+import 'package:html_unescape/html_unescape.dart';
+
 
 class LegistlationPage extends StatefulWidget{
 
   final Bill bill;
   final BillActions action;
+  File? pdf;
 
   LegistlationPage({Key? key, required this.bill, required this.action}) : super(key: key);
   @override
@@ -25,8 +32,15 @@ class _LegislationPageState extends State<LegistlationPage>{
   TextEditingController chatInput = TextEditingController();
   BillSummary? summary = BillSummary(); //create empty summary
   bool isLoading = true;
+  
 
   final StreamController<ChatMessage> messageController = StreamController<ChatMessage>.broadcast();
+
+  String? localPath;
+  bool fileIsLoading = true;
+  int totalPages = 0;
+  int currentPage = 0;
+
 
   //ChatBox Data
     //Set up Firebase Cloud store API - select * from chathistory where userID = User.id AND billID = widget.bill.billID
@@ -45,6 +59,7 @@ class _LegislationPageState extends State<LegistlationPage>{
   void initState(){
     super.initState();
     getSummary(widget.bill);
+    getFiles(widget.bill);
   }
   @override
   Widget build(BuildContext context){
@@ -120,15 +135,49 @@ class _LegislationPageState extends State<LegistlationPage>{
                           ),
                         ),
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => LoadingScreen()),);
+                          print("localpath on press: $localPath");
+                          if (localPath == "NOPATH") {
+                            // Show the alert dialog
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text(
+                                    'Uh oh',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Color.fromARGB(255, 138, 74, 69),
+                                    ),
+                                  ),
+                                  content: Text("It looks like Congress hasn't publized the contents of this bill just yet. Please check back later"),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: const Text('OK'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          } else {
+                            // Navigate to PDF viewer
+                            Navigator.push(
+                              context, 
+                              MaterialPageRoute(
+                                builder: (context) => PDFViewerPage(filePath: localPath!),
+                              ),
+                            );
+                          }
                         },
                       ),
-                      IconButton(
-                        onPressed: () {
-                          Navigator.pop(context); //download and save as a pdf
-                          },
-                         icon: Icon(Icons.file_download)
-                      ),
+                      // IconButton(
+                      //   onPressed: () {
+                      //     Navigator.pop(context); //download and save as a pdf
+                      //     },
+                      //    icon: Icon(Icons.file_download)
+                      // ),
                     ],
                    ),
                   const SizedBox(height: 8),
@@ -149,9 +198,11 @@ class _LegislationPageState extends State<LegistlationPage>{
     String errorMessage = "It looks like Congress has not yet created a summary for this bill. Check back later for updates";
         
     if(summaries.isNotEmpty && mounted){
-      print("SUMMARIES IS NOT EMPTY. OR IS IT");
       setState(() {
         summary = summaries.last;
+        if(summary!.text!.isNotEmpty){
+          summary?.text = convertToPlainText(summary!.text!);
+        }
         isLoading = false;
       });
     }
@@ -163,14 +214,72 @@ class _LegislationPageState extends State<LegistlationPage>{
       });
     }
   }
+   static String convertToPlainText(String htmlString) {
+    if (htmlString == null || htmlString.isEmpty) {
+      return '';
+    }
+
+    final unescape = HtmlUnescape();
+    // Parse the HTML
+    var document = htmlparser.parse(htmlString);
+    // Get the text content
+    String parsedText = document.body?.text ?? '';
+    // Decode HTML entities like &nbsp;
+    String decodedText = unescape.convert(parsedText);
+    
+    // Remove extra whitespace
+    return decodedText.trim().replaceAll(RegExp(r'\s+'), ' ');
+  }
+
   Future<void> getFiles(Bill bill) async{
-    BillData billData = await congressAPI.getBillFiles(bill.congress!, bill.billType!, bill.billNumber!);
+    print("bill in getFiles: congress ${bill.congress}, type: ${bill.billType}, number: ${bill.billNumber}");
+    BillData billData = await congressAPI.getBillFiles(bill.congress!, bill.billType!.toLowerCase(), bill.billNumber!);
     BillFormat? latestBill = billData.getLatestPdfFormat();
+    print("billpath: ${latestBill?.url}");
+    await downloadAndSavePDF(latestBill?.url ?? "");
+    //await downloadAndSavePDF("https://www.congress.gov/117/bills/hr3076/BILLS-117hr3076enr.pdf");
   }
 
-  downLoadFile(File file){
-
+Future<void> downloadAndSavePDF(String url) async {
+    if(url == "" || url.isEmpty){
+      setState(() {
+        localPath = "NOPATH";
+      });
+      print("localpat = $localPath");
+      return;
+    }
+    try {
+      // Get temporary directory
+      final directory = await getTemporaryDirectory();
+      // Create a unique filename based on URL
+      final filename = 'document_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final filePath = '${directory.path}/$filename';
+      
+      // Download the PDF from URL
+      final response = await http.get(Uri.parse(url));
+      
+      if (response.statusCode == 200) {
+        // Save the PDF to the local path
+        final file = File(filePath);
+        await file.writeAsBytes(response.bodyBytes);
+        
+        setState(() {
+          localPath = filePath;
+          fileIsLoading = false;
+        });
+      } else {
+        throw Exception('Failed to download PDF: ${response.statusCode}');
+      }
+    } catch (e) {
+      setState(() {
+        fileIsLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
   }
+
 
 
 }

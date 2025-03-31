@@ -102,7 +102,7 @@ class CongressApiService {
     if (response.statusCode == 200) {
       return BillData.fromJson(response.body);
     } else {
-      throw Exception('Failed to load bill data: ${response.statusCode} ${response.reasonPhrase}');
+      throw BillData();
     }
   }
   // Search bills to find bills of interest
@@ -244,11 +244,11 @@ class BillActions {
 
   factory BillActions.fromJson(Map<String, dynamic> json) {
     try{
-      print("${json['actionCode'] ?? "a"}");
-      print("${json['actionDate'] ?? "b"}");
-      print("${json['committees'] ?? "c"}");
-      print("${json['text'] ?? "d"}");
-      print("${json['type'] ?? "e"}");
+      // print("${json['actionCode'] ?? "a"}");
+      // print("${json['actionDate'] ?? "b"}");
+      // print("${json['committees'] ?? "c"}");
+      // print("${json['text'] ?? "d"}");
+      // print("${json['type'] ?? "e"}");
       return BillActions(
       actionCode: json['actionCode'],
       actionDate: json['actionDate'],
@@ -262,11 +262,11 @@ class BillActions {
     
     }catch(e){
       print("ERROR IN FROMJSON: $e");
-      print("${json['actionCode'] ?? "a"}");
-      print("${json['actionDate'] ?? "b"}");
-      print("${json['committees'] ?? "c"}");
-      print("${json['text'] ?? "d"}");
-      print("${json['type'] ?? "e"}");
+      // print("${json['actionCode'] ?? "a"}");
+      // print("${json['actionDate'] ?? "b"}");
+      // print("${json['committees'] ?? "c"}");
+      // print("${json['text'] ?? "d"}");
+      // print("${json['type'] ?? "e"}");
     }
     return BillActions(actionDate: "a", text: "a", type: "a", committees: [], actionCode: "a");
   }
@@ -308,7 +308,7 @@ class Committee {
     };
   }
   printCommittee(){
-    print("Committee: ${name ?? "no name ERROROEROROE"}");
+    print("Committee: ${name ?? "no name"}");
   }
 }
 
@@ -318,7 +318,7 @@ class BillSummary {
   final String? updateDate;
   final String? actionDate;
   final String? actionDesc;
-  final String? text;
+  String? text;
   final String? versionCode;
   
   BillSummary({
@@ -343,8 +343,8 @@ class BillSummary {
 }
 
 class BillFormat {
-  final String type;
-  final String url;
+  final String? type;
+  final String? url;
 
   BillFormat({required this.type, required this.url});
 
@@ -360,9 +360,9 @@ class BillFormat {
 }
 
 class BillVersion {
-  final String type;
+  final String? type;
   final DateTime? date;
-  final List<BillFormat> formats;
+  final List<BillFormat>? formats;
 
   BillVersion({required this.type, this.date, required this.formats});
 
@@ -377,7 +377,7 @@ class BillVersion {
   }
 
   BillFormat? getFormatByType(String formatType) {
-    for (var format in formats) {
+    for (var format in formats!) {
       if (format.type == formatType) {
         return format;
       }
@@ -393,16 +393,16 @@ class BillVersion {
 }
 
 class BillData {
-  final String billNumber;
-  final String billType;
-  final String congress;
-  final List<BillVersion> textVersions;
+  final String? billNumber;
+  final String? billType;
+  final String? congress;
+  final List<BillVersion>? textVersions;
 
   BillData({
-    required this.billNumber,
-    required this.billType,
-    required this.congress,
-    required this.textVersions,
+     this.billNumber,
+     this.billType,
+     this.congress,
+     this.textVersions,
   });
 
   factory BillData.fromJson(String jsonStr) {
@@ -421,22 +421,26 @@ class BillData {
 
   BillVersion? getLatestVersion() {
     // Filter versions with dates
-    var datedVersions = textVersions.where((version) => version.date != null).toList();
-    
+    List<BillVersion>? datedVersions = [];
+    try{
+    datedVersions = textVersions!.where((version) => version.date != null).toList();
     if (datedVersions.isEmpty) {
-      return null;
+      print("getlatestVersion: datedVersions is empty, returning type == empty");
+      return BillVersion(type: "empty", formats: []);
     }
-    
-    // Sort by date in descending order
-    datedVersions.sort((a, b) => b.date!.compareTo(a.date!));
-    
+    datedVersions.sort((a, b) => b.date!.compareTo(a.date!)); 
+    }catch(e){
+      print("getlatestVersion threw exceptin: $e");
+      return BillVersion(type: "empty", formats: []);
+    }
     return datedVersions.first;
   }
 
   BillFormat? getLatestPdfFormat() {
-    final latestVersion = getLatestVersion();
-    if (latestVersion == null) {
-      return null;
+    final BillVersion? latestVersion = getLatestVersion();
+    if (latestVersion == null || latestVersion.type == "empty") {
+      print("in getlatestPDFformat, is null or empty");
+      return BillFormat(type: "empty", url: "");
     }
     
     return latestVersion.getFormatByType('PDF');
