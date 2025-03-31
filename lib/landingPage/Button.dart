@@ -29,4 +29,13 @@ class MyButton extends StatelessWidget {
           ))),
     );
   }
+  static Function() navigateTo(BuildContext context, Widget page) {
+  return () {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => page,
+      ),
+    );
+  };
+}
 }

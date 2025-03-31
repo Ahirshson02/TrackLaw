@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tracklaw/Button.dart';
-import 'package:tracklaw/First%20page/initial%20page/Squaremaker';
+import 'landingPage/Button.dart';
+import 'landingPage/Squaremaker.dart';
 import 'package:tracklaw/registerPage/RegisterNewAccount.dart';
 
 class LoginPage extends StatefulWidget {

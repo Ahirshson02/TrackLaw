@@ -135,7 +135,9 @@ class FirestoreService {
   // BILL METHODS
   // Create or update a bill
   Future<void> saveBill(Bill bill) async {
+    print("in save bill");
     await _billsCollection.doc(bill.billId).set(bill.toJson());
+    print("HEEERRREE");
   }
 
   // Get a bill by ID

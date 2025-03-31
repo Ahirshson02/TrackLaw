@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:tracklaw/APIs/congressAPI.dart';
+import 'package:tracklaw/landingPage/loadingScreen.dart';
 import 'package:tracklaw/src/chatInterface.dart';
 import 'homescreen.dart';
 import '/main.dart';
@@ -178,7 +179,7 @@ class _LegislationPageState extends State<LegistlationPage>{
                   const SizedBox(height: 8),
                   ChatContainer(messages: _messages),
                   const SizedBox(height: 8),
-                  ChatScreen()
+                  ChatInput()
               ],
             ),
           ),
