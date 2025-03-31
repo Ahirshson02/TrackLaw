@@ -9,9 +9,12 @@ Download the Flutter SDK, should use close to Flutter version 3.27.3, and close 
 
 Clone the GitHub repo into your local IDE
 If you have a mac, run first the emulator through Xcode, then run it without debugging.
-If you have an andriod run your emulator first then, run without debugging
+<p>If you have an andriod run your emulator first then, run without debugging</p>
+<p>If "flutter pub get" does not run automatically, run the command.</p>
+<p>If you dont have flutter currently downloaded, you can download it <a href = 'https://docs.flutter.dev/release/archive'>
+  here
+</a></p>
 
-If "flutter pub get" does not run automatically, run the command.
 
 
 
