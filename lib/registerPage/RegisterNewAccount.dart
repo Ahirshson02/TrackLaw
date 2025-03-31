@@ -1,9 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:tracklaw/landingPage/loadingScreen.dart';
+import 'package:tracklaw/First_page/Button.dart';
+import 'package:tracklaw/First_page/loadingScreen.dart';
 import 'package:tracklaw/loginPage/loginPage.dart';
 import 'package:tracklaw/registerPage/textField.dart';
-import 'package:tracklaw/landingPage/Squaremaker.dart';
-import 'package:tracklaw/landingPage/Button.dart';
+import 'package:tracklaw/First_page/Squaremaker.dart';
+//import 'package:tracklaw/First_page/Button.dart';
 
 class RegisterNewAccount extends StatefulWidget {
   const RegisterNewAccount({Key? key}) : super(key: key);
@@ -17,6 +19,55 @@ class _RegisterNewAccount extends State<RegisterNewAccount> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final reTypePasswordController = TextEditingController();
+
+  Future<void> createUser() async {
+    if (!passwordConfirmed()) {
+      // Show an error message if passwords do not match
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Passwords do not match!")),
+      );
+      return; // Stop function execution
+    }
+    try {
+      if (passwordConfirmed()) {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+      }
+      // print("✅ Sign-in successful!");
+
+      setState(() {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoadingScreen()),
+        );
+      });
+    } on FirebaseAuthException catch (e) {
+      print("❌ Error: ${e.message}");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? "Login failed")),
+      );
+    }
+  }
+
+  bool passwordConfirmed() {
+    if (passwordController.text.trim() ==
+        reTypePasswordController.text.trim()) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    reTypePasswordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,7 +144,10 @@ class _RegisterNewAccount extends State<RegisterNewAccount> {
                     MaterialPageRoute(builder: (context) => LoginAccount()));
               },
             ),
-            MyButton(onTap: MyButton.navigateTo(context, LoadingScreen()))
+
+            MyButton(onTap: () {
+              createUser();
+            })
           ],
         )),
       ),
