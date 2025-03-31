@@ -23,10 +23,10 @@ and a chatbot to ask questions about the bill, powered by Google Gemini.
 Some features are shown but not completed, such as the search bar, filter and sort buttons, and saved bills page.
 
 ## Technologies Used
-Language: Dart\n
-Framework: Flutter
-User Auth: Firebase Authentication
-APIs: U.S. Congress, Firebase, Google Gemini
-AI Chatbot: Google Gemini
+<p>Language: Dart</p>
+<p>Framework: Flutter</p>
+<p>User Auth: Firebase Authentication<p>
+<p>APIs: U.S. Congress, Firebase, Google Gemini</p>
+<p>AI Chatbot: Google Gemini</p>
 
 Mobile App project for Code Crunch 305 Hackathon
