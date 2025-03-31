@@ -8,8 +8,11 @@ This project is a starting point for a Flutter application that follows the
 Download the Flutter SDK, should use close to Flutter version 3.27.3, and close to Dart 3.6.1
 
 Clone the GitHub repo into your local IDE
+If you have a mac, run first the emulator through Xcode, then run it without debugging.
+If you have an andriod run your emulator first then, run without debugging
 
 If "flutter pub get" does not run automatically, run the command.
+
 
 
 ## Functionality
