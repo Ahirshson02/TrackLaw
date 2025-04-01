@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:tracklaw/landingPage/login&signupPage.dart';
+import 'package:tracklaw/landingPage/openingPage.dart';
 import 'package:tracklaw/main.dart';
 import 'package:tracklaw/api/congressAPI.dart';
 import 'package:tracklaw/src/legistlationPage.dart';
