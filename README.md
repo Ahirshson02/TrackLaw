@@ -19,6 +19,10 @@ If you have a mac, run first the emulator through Xcode, then run it without deb
 
 
 
+Plug in a physical cell phone device with developer debugging mode on, or run an emulator.
+Once device is set up, run, "flutter run"
+It may take a few minutes to build.
+
 
 ## Functionality
 
@@ -26,7 +30,7 @@ App opens to a landing page that directs users to either sign in or sign up page
 Once signed in, the user is shown a list of bills currently going through the U.S. Congress, as well as some preliminary info about them, such as
 title, status, the committee working with it, and how recently its been discussed. Also on this home page is a user icon that opens a drawer for the user to sign out.
 The user can tap on a bill card, and are directed to a new screen with more info on the selected bill, such as a summary, the option to read it for themselves in a file viewer,
-and a chatbot to ask questions about the bill, powered by Google Gemini.
+and a chatbot to ask questions about the bill, powered by Google Gemini (chat box and message sending set up, but ran out of time before being able to put Gemini messages into UI).
 
 Some features are shown but not completed, such as the search bar, filter and sort buttons, and saved bills page.
 
