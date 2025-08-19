@@ -1,32 +1,38 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:tracklaw/landingPage/login&signupPage.dart';
-import 'package:tracklaw/main.dart';
-import 'package:tracklaw/api/congressAPI.dart';
-import 'package:tracklaw/src/legistlationPage.dart';
-import '/api/firebaseAPI.dart';
 
-class Homescreen extends StatefulWidget{
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'package:tracklaw/landingPage/openingPage.dart';
+import 'package:tracklaw/billPage/legistlationPage.dart';
+import 'package:tracklaw/models/congress.dart';
+import '../apis/firebaseAPI.dart';
+
+class FeedPage extends StatefulWidget{
   final List<Bill> bills;
   final Map<String, List<BillActions>> actions;
   final firestoreDb = FirebaseFirestore.instance;
   final FirestoreService f = FirestoreService();
-
+  static String id = 'feed';
   
-  Homescreen({Key? key, required this.bills, required this.actions}) : super(key: key);
+  FeedPage({Key? key, required this.bills, required this.actions}) : super(key: key);
   @override
-  State<Homescreen> createState() => _HomescreenState();
+  State<FeedPage> createState() => _FeedPageState();
   
 }
 
-class _HomescreenState extends State<Homescreen>{
+class _FeedPageState extends State<FeedPage>{
   TextEditingController _searchController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   var summariesSize = 0;
   void initState() {
     super.initState();
     summariesSize = widget.actions.length; // Initialize it here
+  }
+
+  void logout() async{
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushNamed(context, WelcomePage.id);
   }
 
   
@@ -110,7 +116,7 @@ class _HomescreenState extends State<Homescreen>{
                   // Close the drawer first
                   Navigator.pop(context);
                   // TODO: Replace with your navigation
-                   Navigator.push(context, MaterialPageRoute(builder: (context) => openingPage()));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => WelcomePage()));
                 },
               ),
             ),
@@ -125,11 +131,8 @@ class _HomescreenState extends State<Homescreen>{
                 ),
                 onPressed: () {
                   // Close the drawer first
-                  Navigator.pop(context);
-                  // TODO: Replace with your navigation
-                   Navigator.push(context, MaterialPageRoute(builder: (context) => openingPage()));
-                },
-              ),
+                  logout();
+                }),
             ),
             ],
           ),

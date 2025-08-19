@@ -3,13 +3,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:tracklaw/api/congressAPI.dart';
-import 'package:tracklaw/landingPage/loadingScreen.dart';
-import 'package:tracklaw/src/chatInterface.dart';
-import 'package:tracklaw/src/pdfViewer.dart';
-import 'homescreen.dart';
-import '/main.dart';
-import '/api/firebaseAPI.dart';
+
+import 'package:tracklaw/apis/congressAPI.dart';
+import 'package:tracklaw/billPage/chatInterface.dart';
+import 'package:tracklaw/billPage/messageService.dart';
+import 'package:tracklaw/billPage/pdfViewer.dart';
+import 'package:tracklaw/models/congress.dart';
+import 'package:tracklaw/models/chatMessage.dart';
+
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as htmlparser; // For simple parsing
 import 'package:html_unescape/html_unescape.dart';
@@ -19,7 +20,6 @@ class LegistlationPage extends StatefulWidget{
 
   final Bill bill;
   final BillActions action;
-  File? pdf;
 
   LegistlationPage({Key? key, required this.bill, required this.action}) : super(key: key);
   @override
@@ -32,15 +32,14 @@ class _LegislationPageState extends State<LegistlationPage>{
   TextEditingController chatInput = TextEditingController();
   BillSummary? summary = BillSummary(); //create empty summary
   bool isLoading = true;
+  late StreamSubscription<ChatMessage> _subscription;
   
 
   final StreamController<ChatMessage> messageController = StreamController<ChatMessage>.broadcast();
 
   String? localPath;
   bool fileIsLoading = true;
-  int totalPages = 0;
-  int currentPage = 0;
-
+  
 
   //ChatBox Data
     //Set up Firebase Cloud store API - select * from chathistory where userID = User.id AND billID = widget.bill.billID
@@ -60,13 +59,23 @@ class _LegislationPageState extends State<LegistlationPage>{
     super.initState();
     getSummary(widget.bill);
     getFiles(widget.bill);
+    _subscription = MessageService().messageStream.listen((message){
+      setState((){
+        _messages.add(message);
+      });
+    });
+  }
+  @override
+  void dispose(){
+    _subscription.cancel();
+    super.dispose();
   }
   @override
   Widget build(BuildContext context){
     
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: isLoading ? 
+      home: (isLoading || localPath == null) ? 
        Scaffold(
         appBar: AppBar(title: Text('Legislation Loading')),
         body: Center(child: CircularProgressIndicator()),
@@ -183,7 +192,7 @@ class _LegislationPageState extends State<LegistlationPage>{
                   const SizedBox(height: 8),
                   ChatContainer(messages: _messages, bill: widget.bill),
                   const SizedBox(height: 8),
-                  ChatInput(bill: widget.bill)
+                  ChatInput(bill: widget.bill, filepath: localPath!,)
               ],
             ),
           ),
@@ -245,14 +254,12 @@ Future<void> downloadAndSavePDF(String url) async {
       setState(() {
         localPath = "NOPATH";
       });
-      print("localpat = $localPath");
+      print("localpath = $localPath");
       return;
     }
     try {
-      // Get temporary directory
       final directory = await getTemporaryDirectory();
-      // Create a unique filename based on URL
-      final filename = 'document_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final filename = 'document_${DateTime.now().millisecondsSinceEpoch}.pdf'; //Create folder for TrackLaw to read/write bills to to avoid duplicate files
       final filePath = '${directory.path}/$filename';
       
       // Download the PDF from URL

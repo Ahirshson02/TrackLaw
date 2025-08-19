@@ -1,3 +1,5 @@
+
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tracklaw/landingPage/loadingScreen.dart';
@@ -5,6 +7,7 @@ import 'package:tracklaw/landingPage/openingPage.dart';
 
 class auth extends StatelessWidget {
   const auth({Key? key}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
@@ -20,10 +23,10 @@ class auth extends StatelessWidget {
                 if (user != null && user.emailVerified) {
                   return LoadingScreen(); // ✅ Only verified users proceed
                 } else {
-                  return openingPage(); // ❌ Unverified users go to openingPage
+                  return WelcomePage(); // ❌ Unverified users go to openingPage
                 }
               } else {
-                return openingPage();
+                return WelcomePage();
               }
             },
           );

@@ -1,36 +1,52 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:tracklaw/src/messageService.dart';
-import "/api/firebaseAPI.dart";
-import '/api/congressAPI.dart';
-import 'legistlationPage.dart';
+import 'package:provider/provider.dart';
+import 'package:tracklaw/billPage/messageService.dart';
+import 'package:tracklaw/models/congress.dart';
+import "../apis/firebaseAPI.dart";
+import '../models/chatMessage.dart';
+import '../models/legislativePrompt.dart';
+
 
 
 class ChatContainer extends StatefulWidget {
   List<ChatMessage> messages;
   final Bill bill;
    ChatContainer({
-    Key? key, 
+    super.key, 
     required this.messages,
     required this.bill,
     //this.scrollController,
-  }) : super(key: key);
+  });
 
 State<ChatContainer> createState() => _ChatContainer();
 }
 class _ChatContainer extends State<ChatContainer>{
   final ScrollController? scrollController = ScrollController();
-  late StreamSubscription<ChatMessage> _subscription;
+  //late StreamSubscription<ChatMessage> _subscription;
  
   @override
 void initState() {
   super.initState();
-  _subscription = MessageService().messageStream.listen((message) {
-    setState(() {
-      widget.messages.add(message);
-    });
-  });
+  // _subscription = MessageService().messageStream.listen((message) {
+  //   setState(() {
+  //     widget.messages.add(message);
+  //   });
+  // });
+}
+
+@override
+void dispose(){
+ // _subscription.cancel();
+  scrollController?.dispose();
+  super.dispose();
 }
 
   @override
@@ -126,29 +142,54 @@ class MessageBubble extends StatelessWidget {
 
 class ChatInput extends StatefulWidget {
   final Bill bill;
-  const ChatInput({Key? key, required this.bill}) : super(key: key);
+  final String filepath;
+  const ChatInput({Key? key, required this.bill, required this.filepath}) : super(key: key);
+  
 
   @override
   State<ChatInput> createState() => _ChatInputState();
 }
 class _ChatInputState extends State<ChatInput> {
   
-  String apiKey = "AIzaSyAV_l2AufaBT4lBvl8IWt2-_K9JBMxFnic";
+  final String apiKey = dotenv.env['GEMINI_API'] ?? 'default_key';
   final FirestoreService firestore = FirestoreService();
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _textController = TextEditingController();
   late final GenerativeModel model;
-  
+  late final String fileContents;
+
   @override initState(){
     super.initState();
     model = GenerativeModel(
-      model: 'gemini-1.5-flash-latest',
+      model: 'gemini-2.5-flash-lite',
       apiKey: apiKey,
     );
+   // fileContents = textFromPdf(widget.filepath).toString();
+   // print("filecontents: $fileContents");
+    loadText();
+  }
+  Future<void> loadText() async{
+    try {
+    final content = await textFromPdf(widget.filepath);
+    setState(() {
+      fileContents = content; // Update state when ready
+    });
+    print("filecontents: $fileContents");
+  } catch (e) {
+    print("Error loading PDF: $e");
+  }
+  }
+  Future<String> textFromPdf(String filepath) async{
+    final bytes = await File(filepath).readAsBytes();
+    final document = PdfDocument(inputBytes: bytes);
+    String text = PdfTextExtractor(document).extractText();
+    document.dispose();
+    return text;
   }
 
 
- Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
+    //String userId = context.read<UserNotifier>().user!.id;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
       decoration: BoxDecoration(
@@ -190,20 +231,20 @@ class _ChatInputState extends State<ChatInput> {
               onPressed: () {
                 // Send message logic
                 if (_textController.text.trim().isNotEmpty) {
-                  setState(() async {
-                    //send new message object to list of messages in ChatContainer
+                  setState(() {
+                    //send new message object to list of messages in ChatContainer;
                     _sendMessage(true, _textController.text);
                    _textController.clear();
                   });
 
                   // Auto-scroll to the bottom
-                  Future.delayed(const Duration(milliseconds: 100), () {
-                    _scrollController.animateTo(
-                      _scrollController.position.maxScrollExtent,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeOut,
-                    );
-                  });
+                  // Future.delayed(const Duration(milliseconds: 100), () {
+                  //   _scrollController.animateTo(
+                  //     _scrollController.position.maxScrollExtent,
+                  //     duration: const Duration(milliseconds: 300),
+                  //     curve: Curves.easeOut,
+                  //   );
+                  // });
                 }
               },
             ),
@@ -213,18 +254,22 @@ class _ChatInputState extends State<ChatInput> {
     );
   }
   void _sendMessage(bool isUser, String text) {
+
     final messageID = FirestoreService().getNewMessageID();
-    final ChatMessage message = ChatMessage(id: messageID, userId: "1", billId: widget.bill.billId, text: text, isFromUser: isUser, timestamp: DateTime.now());
+    final user = FirebaseAuth.instance.currentUser;
+    String userId = user!.uid;
+    final ChatMessage message = ChatMessage(id: messageID, userId: userId, billId: widget.bill.billId, text: text, isFromUser: isUser, timestamp: DateTime.now());
     firestore.sendMessage(message);
     MessageService().sendMessage(message);
-    talkWithGemini(text);
+    sendToGemini(text, userId);
   }
 
-  Future<void> talkWithGemini(String userInput) async {
-    final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
-
-    final content = Content.text(userInput);
-
+  Future<void> sendToGemini(String userInput, String userId) async {
+    
+    List<List<String>> chatHistory = MessageService().readMessages();
+    final prompt = LegislativePrompt(documentName: widget.bill.title!, documentText: fileContents, chatHistory: chatHistory).build();
+    final content = Content.text(prompt);
+    print("sending to Gemini");
     final response = await model.generateContent([content]);
     final textResponse = response.text ?? "No response";
 
@@ -232,7 +277,7 @@ class _ChatInputState extends State<ChatInput> {
       final messageID = FirestoreService().getNewMessageID();
       final ChatMessage message = ChatMessage(
           id: messageID,
-          userId: "1",
+          userId: userId,
           billId: widget.bill.billId,
           text: textResponse,
           isFromUser: false,
@@ -240,7 +285,6 @@ class _ChatInputState extends State<ChatInput> {
       firestore.sendMessage(message);
       MessageService().sendMessage(message);
     });
-    print("finish talk");
   }
 
   @override
@@ -250,6 +294,5 @@ class _ChatInputState extends State<ChatInput> {
     super.dispose();
   }
 
-  
 
 }

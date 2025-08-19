@@ -1,9 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:tracklaw/api/congressAPI.dart';
-import 'package:tracklaw/src/homescreen.dart';
+import 'package:tracklaw/apis/congressAPI.dart';
+import 'package:tracklaw/models/congress.dart';
+import 'package:tracklaw/src/feedPage.dart';
 
 class LoadingScreen extends StatefulWidget {
+  static String id = 'loading_screen';
   @override
   _LoadingScreenState createState() => _LoadingScreenState();
 }
@@ -59,7 +61,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
         // When data is ready, navigate to HomeScreen
         final data = snapshot.data!;
-        return Homescreen(
+        return FeedPage(
           bills: data["bills"] as List<Bill>,
           actions: data["actions"] as Map<String, List<BillActions>>,
         );

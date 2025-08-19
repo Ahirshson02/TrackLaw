@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:tracklaw/landingPage/Button.dart';
+import 'package:tracklaw/landingPage/signInButton.dart';
 import 'package:tracklaw/landingPage/loadingScreen.dart';
 import 'package:tracklaw/loginPage/loginPage.dart';
-import 'package:tracklaw/registerPage/textField.dart';
-import 'package:tracklaw/landingPage/Squaremaker.dart';
+import 'package:tracklaw/registerPage/signInField.dart';
+import 'package:tracklaw/landingPage/imageBox.dart';
 //import 'package:tracklaw/First_page/Button.dart';
 
 class RegisterNewAccount extends StatefulWidget {
@@ -19,6 +19,9 @@ class _RegisterNewAccount extends State<RegisterNewAccount> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final reTypePasswordController = TextEditingController();
+
+  bool hidePassword = true;
+  bool hideConfirmPassword = true;
 
   Future<void> createUser() async {
     if (!passwordConfirmed()) {
@@ -83,28 +86,28 @@ class _RegisterNewAccount extends State<RegisterNewAccount> {
                   style: TextStyle(fontSize: 20)),
             ),
             SizedBox(height: 30),
-            Mytext(
+            SignInField(
                 controller: userNameController,
                 hintText: 'Username',
                 obscureText: false),
             //email
             SizedBox(height: 30),
-            Mytext(
+            SignInField(
                 controller: emailController,
                 hintText: 'email',
                 obscureText: false),
             //password
             SizedBox(height: 30),
-            Mytext(
+            SignInField(
                 controller: passwordController,
                 hintText: 'password',
-                obscureText: false),
+                obscureText: hidePassword),
             //retypePassword
             SizedBox(height: 30),
-            Mytext(
+            SignInField(
                 controller: reTypePasswordController,
                 hintText: 'Retype your password',
-                obscureText: false),
+                obscureText: hideConfirmPassword),
             SizedBox(height: 50),
             Text('You can also register with the following',
                 style: TextStyle(fontSize: 15, color: Colors.grey)),
@@ -128,11 +131,11 @@ class _RegisterNewAccount extends State<RegisterNewAccount> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Squaretile(imagePath: 'lib/images/Instagram_icon.jpg'),
+                    ImageBox(imagePath: 'lib/images/Instagram_icon.jpg'),
                     SizedBox(width: 60),
-                    Squaretile(imagePath: 'lib/images/X_logo.png'),
+                    ImageBox(imagePath: 'lib/images/X_logo.png'),
                     SizedBox(width: 60),
-                    Squaretile(imagePath: 'lib/images/GoogleImage.png')
+                    ImageBox(imagePath: 'lib/images/GoogleImage.png')
                   ],
                 )),
             SizedBox(height: 20),
@@ -145,8 +148,12 @@ class _RegisterNewAccount extends State<RegisterNewAccount> {
               },
             ),
 
-            MyButton(onTap: () {
-              createUser();
+            SignInButton(onTap: () {
+              //createUser();
+              setState(() {
+                hideConfirmPassword = false;
+                hidePassword = false;
+              });
             })
           ],
         )),

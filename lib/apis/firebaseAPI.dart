@@ -1,17 +1,128 @@
+import 'dart:async';
+
+import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'congressAPI.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter/material.dart';
+import 'package:tracklaw/models/congress.dart';
+import 'package:tracklaw/models/chatMessage.dart';
+
+
+// class UserNotifier extends ChangeNotifier {
+//   User? _user;
+//   final firebase_auth.FirebaseAuth _auth = firebase_auth.FirebaseAuth.instance;
+//   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+//   get user => null;
+  
+//   void initializeUser() {
+//     _auth.authStateChanges().listen((firebaseUser) async {
+//       if (firebaseUser != null) {
+//         // Load additional user data from Firestore
+//         final userData = await _firestore
+//             .collection('users')
+//             .doc(firebaseUser.uid)
+//             .get();
+        
+//         _user = User.fromFirebase(firebaseUser, userData.data());
+//        //_user = User.fromFirebase(userData.data()!);
+//         notifyListeners();
+//       } else {
+//         _user = null;
+//         notifyListeners();
+//       }
+//     });
+//   }
+  
+//   Future<void> updateUserLikes(String itemId) async {
+//     _user?.likes.add(itemId);
+//     notifyListeners();
+    
+//     // Sync to Firebase
+//     await _firestore
+//         .collection('users')
+//         .doc(_user?.id)
+//         .update({'likes': _user?.likes});
+//   }
+// }
+
+class UserNotifier extends ChangeNotifier {
+  User? _user;
+  StreamSubscription<firebase_auth.User?>? _authSubscription;
+  
+  User? get user => _user;
+  bool get isLoggedIn => _user != null;
+  
+  UserNotifier() {
+    _initializeAuthListener();
+  }
+  
+  void _initializeAuthListener() {
+    _authSubscription = firebase_auth.FirebaseAuth.instance
+        .authStateChanges()
+        .listen((firebaseUser) async {
+      if (firebaseUser != null) {
+        print('User signed in: ${firebaseUser.email}');
+        
+        // Here you could fetch additional user data from Firestore
+        final userData = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(firebaseUser.uid)
+            .get();
+        
+        // Create your custom User object
+        _user = User.fromFirebase(firebaseUser, userData.data());
+        
+        notifyListeners(); // This updates all widgets using context.watch
+      } else {
+        print('User signed out');
+        _user = null;
+        notifyListeners();
+      }
+    });
+  }
+  
+  // Your app-specific methods
+  void addLike(String itemId) {
+    if (_user != null && !_user!.likes.contains(itemId)) {
+      _user!.likes.add(itemId);
+      notifyListeners();
+      // Sync to Firestore here if needed
+    }
+  }
+  
+  void removeLike(String itemId) {
+    if (_user != null) {
+      _user!.likes.remove(itemId);
+      notifyListeners();
+    }
+  }
+  
+  Future<void> signOut() async {
+    await firebase_auth.FirebaseAuth.instance.signOut();
+    // _user will automatically be set to null by the auth listener
+  }
+  
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
+  }
+}
 
 class User {
   final String id;
   final String email;
   final DateTime createdAt;
-  final List<String> followedBillIds;
+  final List<String> likes; //Convert to List<bills>, and have a Bills collection?
+  final DateTime lastActive;
 
   User({
     required this.id,
     required this.email,
     required this.createdAt,
-    required this.followedBillIds,
+    required this.likes,
+    required this.lastActive,
   });
 
   // Convert User object to a Map for Firestore
@@ -20,63 +131,37 @@ class User {
       'id': id,
       'email': email,
       'createdAt': createdAt,
-      'followedBillIds': followedBillIds,
+      'followedBillIds': likes,
     };
   }
 
   // Create User object from Firestore document
-  factory User.fromFirestore(Map<String, dynamic> data) {
+  //  ADAPT THIS FACTORY MODEL
+  factory User.fromFirebase(
+    firebase_auth.User firebaseUser, 
+    Map<String, dynamic>? firestoreData
+  ) {
     return User(
-      id: data['id'],
-      email: data['email'],
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      followedBillIds: List<String>.from(data['followedBillIds'] ?? []),
+      id: firebaseUser.uid,                    // From Firebase Auth
+      email: firebaseUser.email ?? '',        // From Firebase Auth
+      likes: List<String>.from(firestoreData?['likes'] ?? []),           // From Firestore
+      lastActive: (firestoreData?['lastActive'] as Timestamp?)?.toDate() 
+                  ?? DateTime.now(),  // From Firestore
+      createdAt: (firestoreData?['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
+  // factory User.fromFirebase(Map<String, dynamic> data) {
+  //   return User(
+  //     id: data['id'],
+  //     email: data['email'],
+  //     createdAt: (data['createdAt'] as Timestamp).toDate(),
+  //     likes: List<String>.from(data['followedBillIds'] ?? []),
+  //     lastActive: (firestoreData?['lastActive'] as Timestamp?)?.toDate() 
+  //                  ?? DateTime.now(),  // From Firestore
+  //   );
+  // }
 }
 
-// ChatMessage model
-class ChatMessage {
-  final String id;
-  final String userId;
-  final String billId;
-  final String text;
-  final bool isFromUser;
-  final DateTime timestamp;
-
-  ChatMessage({
-    required this.id,
-    required this.userId,
-    required this.billId,
-    required this.text,
-    required this.isFromUser,
-    required this.timestamp,
-  });
-
-  // Convert ChatMessage object to a Map for Firestore
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'userId': userId,
-      'billId': billId,
-      'text': text,
-      'isFromuser': isFromUser,
-      'timestamp': timestamp,
-    };
-  }
-
-  // Create ChatMessage object from Firestore document
-  factory ChatMessage.fromFirestore(Map<String, dynamic> data) {
-    return ChatMessage(
-      id: data['id'],
-      userId: data['userId'],
-      billId: data['billId'],
-      text: data['text'],
-      isFromUser: data['isFromUser'],
-      timestamp: (data['timestamp'] as Timestamp).toDate(),
-    );
-  }
-}
 
 // Firebase Service class to handle all Firestore operations
 class FirestoreService {
@@ -94,30 +179,28 @@ class FirestoreService {
 
   // USER METHODS
   // Create or update a user
-  Future<void> saveUser(User user) async {
-    await _usersCollection.doc(user.id).set(user.toMap());
-  }
 
+//SHOULDN'T NEED
   // Get a user by ID
-  Future<User?> getUserById(String userId) async {
-    final doc = await _usersCollection.doc(userId).get();
-    if (doc.exists) {
-      return User.fromFirestore(doc.data() as Map<String, dynamic>);
-    }
-    return null;
-  }
+  // Future<User?> getUserById(String userId) async {
+  //   final doc = await _usersCollection.doc(userId).get();
+  //   if (doc.exists) {
+  //     return User.fromFirebase(doc.data() as Map<String, dynamic>);
+  //   }
+  //   return null;
+  // }
 
-  // Get a user by email
-  Future<User?> getUserByEmail(String email) async {
-    final querySnapshot =
-        await _usersCollection.where('email', isEqualTo: email).limit(1).get();
+  // // Get a user by email
+  // Future<User?> getUserByEmail(String email) async {
+  //   final querySnapshot =
+  //       await _usersCollection.where('email', isEqualTo: email).limit(1).get();
 
-    if (querySnapshot.docs.isNotEmpty) {
-      return User.fromFirestore(
-          querySnapshot.docs.first.data() as Map<String, dynamic>);
-    }
-    return null;
-  }
+  //   if (querySnapshot.docs.isNotEmpty) {
+  //     return User.fromFirebase(
+  //         querySnapshot.docs.first.data() as Map<String, dynamic>);
+  //   }
+  //   return null;
+  // }
 
   // Update user's followed bills
   Future<void> followBill(String userId, String billId) async {

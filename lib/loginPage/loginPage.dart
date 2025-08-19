@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tracklaw/landingPage/loadingScreen.dart';
-import 'package:tracklaw/registerPage/textField.dart';
-import 'package:tracklaw/landingPage/Button.dart';
+import 'package:tracklaw/registerPage/signInField.dart';
+import 'package:tracklaw/landingPage/signInButton.dart';
 
 class LoginAccount extends StatefulWidget {
   const LoginAccount({Key? key}) : super(key: key);
@@ -61,16 +61,16 @@ class _LoginAccount extends State<LoginAccount> {
                   style: TextStyle(fontSize: 20)),
             ),
             SizedBox(height: 30),
-            Mytext(
+            SignInField(
                 controller: emailController,
                 hintText: 'email',
                 obscureText: false),
             //password
             SizedBox(height: 30),
-            Mytext(
+            SignInField(
                 controller: passwordController,
                 hintText: 'password',
-                obscureText: false),
+                obscureText: true),
 
             SizedBox(height: 70),
             Text('You can also register with the following',
@@ -89,7 +89,7 @@ class _LoginAccount extends State<LoginAccount> {
             ),
 
             SizedBox(height: 20),
-            MyButton(onTap: () {
+            SignInButton(onTap: () {
               signIn();
             })
           ],

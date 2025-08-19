@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:tracklaw/landingPage/Button.dart';
-import 'package:tracklaw/landingPage/Squaremaker.dart';
+import 'package:tracklaw/landingPage/signInButton.dart';
+import 'package:tracklaw/landingPage/imageBox.dart';
 import 'package:tracklaw/loginPage/loginPage.dart';
-import 'package:tracklaw/registerPage/RegisterNewAccount.dart';
+import 'package:tracklaw/registerPage/signupPage.dart';
 
-class openingPage extends StatefulWidget {
-  const openingPage({super.key});
+class WelcomePage extends StatefulWidget {
+  static String id = 'welcome';
+
+  const WelcomePage({super.key});
 
   @override
-  State<openingPage> createState() => _openingPageState();
+  State<WelcomePage> createState() => _WelcomePageState();
 }
 
-class _openingPageState extends State<openingPage> {
+class _WelcomePageState extends State<WelcomePage> {
   // ignore: unused_field
   double _opacity = 0.0;
   @override
@@ -63,7 +65,7 @@ class _openingPageState extends State<openingPage> {
                                   'Putting the law in the eyes of the people',
                                   style: TextStyle(fontSize: 30))),
                           SizedBox(height: 40),
-                          MyButton(
+                          SignInButton(
                             onTap: () {
                               Navigator.push(
                                   context,
@@ -96,12 +98,12 @@ class _openingPageState extends State<openingPage> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Squaretile(
-                                      imagePath: '../images/Instagram_icon.jpg'),
+                                  ImageBox(
+                                      imagePath: 'lib/images/Instagram_icon.jpg'),
                                   SizedBox(width: 60),
-                                  Squaretile(imagePath: 'lib/images/X_logo.png'),
+                                  ImageBox(imagePath: 'lib/images/X_logo.png'),
                                   SizedBox(width: 60),
-                                  Squaretile(
+                                  ImageBox(
                                       imagePath: 'lib/images/GoogleImage.png')
                                 ],
                               )),

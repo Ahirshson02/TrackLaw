@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-class Squaretile extends StatelessWidget {
+class ImageBox extends StatelessWidget {
   final String imagePath;
-  const Squaretile({
+  const ImageBox({
     super.key,
     required this.imagePath,
   });
