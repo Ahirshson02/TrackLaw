@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
@@ -49,7 +48,7 @@ import 'package:tracklaw/models/chatMessage.dart';
 class UserNotifier extends ChangeNotifier {
   User? _user;
   StreamSubscription<firebase_auth.User?>? _authSubscription;
-  
+  FirestoreService fs = FirestoreService();
   User? get user => _user;
   bool get isLoggedIn => _user != null;
   
@@ -69,10 +68,11 @@ class UserNotifier extends ChangeNotifier {
             .collection('users')
             .doc(firebaseUser.uid)
             .get();
-        
-        // Create your custom User object
-        _user = User.fromFirebase(firebaseUser, userData.data());
-        
+        final likesData = await FirebaseFirestore.instance.collection('likes').doc(firebaseUser.uid).get();
+
+        _user = User.fromFirebase(firebaseUser, userData.data(), likesData.data());
+
+      
         notifyListeners(); // This updates all widgets using context.watch
       } else {
         print('User signed out');
@@ -87,7 +87,7 @@ class UserNotifier extends ChangeNotifier {
     if (_user != null && !_user!.likes.contains(itemId)) {
       _user!.likes.add(itemId);
       notifyListeners();
-      // Sync to Firestore here if needed
+      fs.followBill(_user!.id, itemId);
     }
   }
   
@@ -95,6 +95,7 @@ class UserNotifier extends ChangeNotifier {
     if (_user != null) {
       _user!.likes.remove(itemId);
       notifyListeners();
+      fs.unfollowBill(_user!.id, itemId);
     }
   }
   
@@ -114,7 +115,7 @@ class User {
   final String id;
   final String email;
   final DateTime createdAt;
-  final List<String> likes; //Convert to List<bills>, and have a Bills collection?
+  List<String> likes; //Convert to List<bills>, and have a Bills collection?
   final DateTime lastActive;
 
   User({
@@ -139,17 +140,20 @@ class User {
   //  ADAPT THIS FACTORY MODEL
   factory User.fromFirebase(
     firebase_auth.User firebaseUser, 
-    Map<String, dynamic>? firestoreData
+    Map<String, dynamic>? firestoreData,
+    Map<String, dynamic>? likeData
   ) {
+
     return User(
       id: firebaseUser.uid,                    // From Firebase Auth
       email: firebaseUser.email ?? '',        // From Firebase Auth
-      likes: List<String>.from(firestoreData?['likes'] ?? []),           // From Firestore
+      likes: List<String>.from(likeData?['billID'] ?? []),           // From Firestore
       lastActive: (firestoreData?['lastActive'] as Timestamp?)?.toDate() 
                   ?? DateTime.now(),  // From Firestore
       createdAt: (firestoreData?['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
+
   // factory User.fromFirebase(Map<String, dynamic> data) {
   //   return User(
   //     id: data['id'],
@@ -171,11 +175,13 @@ class FirestoreService {
   final CollectionReference _usersCollection;
   final CollectionReference _billsCollection;
   final CollectionReference _messagesCollection;
+  final CollectionReference _likesCollection;
 
   FirestoreService()
       : _usersCollection = FirebaseFirestore.instance.collection('users'),
         _billsCollection = FirebaseFirestore.instance.collection('bills'),
-        _messagesCollection = FirebaseFirestore.instance.collection('messages');
+        _messagesCollection = FirebaseFirestore.instance.collection('messages'),
+        _likesCollection = FirebaseFirestore.instance.collection('likes');
 
   // USER METHODS
   // Create or update a user
@@ -204,15 +210,24 @@ class FirestoreService {
 
   // Update user's followed bills
   Future<void> followBill(String userId, String billId) async {
-    await _usersCollection.doc(userId).update({
-      'followedBillIds': FieldValue.arrayUnion([billId])
-    });
+    // await _usersCollection.doc(userId).update({
+    //   'followedBillIds': FieldValue.arrayUnion([billId])
+    // });
+    final likes = _likesCollection.doc(userId);
+    //merge new billId into likes
+    await likes.set({'billID': FieldValue.arrayUnion([billId])
+    //don't overwrite previous likes
+    }, SetOptions(merge: true));
   }
 
   Future<void> unfollowBill(String userId, String billId) async {
-    await _usersCollection.doc(userId).update({
-      'followedBillIds': FieldValue.arrayRemove([billId])
-    });
+    // await _usersCollection.doc(userId).update({
+    //   'followedBillIds': FieldValue.arrayRemove([billId])
+    // });
+      final likes = _likesCollection.doc(userId);
+      //merge new billId into likes
+      await likes.update({'billID': FieldValue.arrayRemove([billId])
+      });
   }
 
   // BILL METHODS

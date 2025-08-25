@@ -1,13 +1,11 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:provider/provider.dart';
 import 'package:tracklaw/billPage/messageService.dart';
 import 'package:tracklaw/models/congress.dart';
 import "../apis/firebaseAPI.dart";
@@ -26,7 +24,8 @@ class ChatContainer extends StatefulWidget {
     //this.scrollController,
   });
 
-State<ChatContainer> createState() => _ChatContainer();
+@override
+  State<ChatContainer> createState() => _ChatContainer();
 }
 class _ChatContainer extends State<ChatContainer>{
   final ScrollController? scrollController = ScrollController();
@@ -94,10 +93,10 @@ class MessageBubble extends StatelessWidget {
   final bool isUser;
 
   const MessageBubble({
-    Key? key,
+    super.key,
     required this.message,
     required this.isUser,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

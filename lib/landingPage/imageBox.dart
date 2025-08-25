@@ -9,11 +9,9 @@ class ImageBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Image.asset(
-        imagePath,
-        height: 60,
-      ),
+    return Image.asset(
+      imagePath,
+      height: 60,
     );
   }
 }

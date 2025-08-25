@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:tracklaw/landingPage/signInButton.dart';
+import 'package:tracklaw/userAuth/signInButton.dart';
 import 'package:tracklaw/landingPage/imageBox.dart';
-import 'package:tracklaw/loginPage/loginPage.dart';
-import 'package:tracklaw/registerPage/signupPage.dart';
+import 'package:tracklaw/userAuth/loginPage.dart';
+import 'package:tracklaw/userAuth/signupPage.dart';
 
 class WelcomePage extends StatefulWidget {
   static String id = 'welcome';

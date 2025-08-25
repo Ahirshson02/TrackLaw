@@ -176,7 +176,7 @@ class Committee {
     };
   }
   printCommittee(){
-    print("Committee: ${name ?? "no name"}");
+    print("Committee: $name");
   }
 }
 

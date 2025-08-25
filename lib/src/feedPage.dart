@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
 import 'package:tracklaw/landingPage/openingPage.dart';
 import 'package:tracklaw/billPage/legistlationPage.dart';
@@ -38,7 +39,7 @@ class _FeedPageState extends State<FeedPage>{
   
   @override
   Widget build(BuildContext context){
-    print("In homescreen widget");
+    print("In feed widget");
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -115,7 +116,6 @@ class _FeedPageState extends State<FeedPage>{
                 onPressed: () {
                   // Close the drawer first
                   Navigator.pop(context);
-                  // TODO: Replace with your navigation
                   Navigator.push(context, MaterialPageRoute(builder: (context) => WelcomePage()));
                 },
               ),
@@ -150,36 +150,7 @@ class _FeedPageState extends State<FeedPage>{
             ),
             // Bills list - using Expanded is crucial here
             Expanded(
-              child: ListView.separated(
-                padding: EdgeInsets.all(16.0),
-                itemCount: widget.bills.length,
-                itemBuilder: (context, index) {
-                  final bill = widget.bills[index];
-                  final actions = widget.actions[bill.billId] ?? []; // Default to empty list if null
-                        // print("bills length is ${widget.bills.length}");
-                        // print("bill ID: ${bill.billId}");
-                        // print("actions for this bill: ${actions.last.type}");
-                        // print("actions is empty? ${actions.isEmpty}");
-                        // print("length = ${actions.length}");
-                        actions.first.printBillAction();
-                        print("--------------------------------");
-                       // print("last action: actions size: ${actions.length}");
-                        actions.last.printBillAction();
-                        var mostRecentAction = (actions.isNotEmpty && actions.length > 0) 
-                            ? actions.first // Or some other safe access
-                            : null;
-    
-                        mostRecentAction?.committees = actions.first.committees ?? [];
-                        
-                  return BillCard(
-                    bill: bill,
-                    action: mostRecentAction ?? BillActions(actionDate: "a", text: "a", type: "a", committees: [], actionCode: "a"), // Pass null if no summaries exist
-                  );
-                },
-                separatorBuilder: (context, index){
-                  return SizedBox(height: 8.0);
-                }
-              ),
+              child: FeedScroll(bills: widget.bills, actions: widget.actions),
             ),
           ]
         ),
@@ -187,21 +158,74 @@ class _FeedPageState extends State<FeedPage>{
     );
   }
 }
+
+class FeedScroll extends StatelessWidget {
+  const FeedScroll({
+    super.key,
+    required this.bills,
+    required this.actions
+  });
+
+  final List<Bill> bills;
+  final Map<String, List<BillActions>> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: EdgeInsets.all(16.0),
+      itemCount: bills.length,
+      itemBuilder: (context, index) {
+        final bill = bills[index];
+        final action = actions[bill.billId] ?? []; // Default to empty list if null
+        // print("bills length is ${widget.bills.length}");
+        // print("bill ID: ${bill.billId}");
+        // print("actions for this bill: ${actions.last.type}");
+        // print("actions is empty? ${actions.isEmpty}");
+        // print("length = ${actions.length}");
+        action.first.printBillAction();
+        print("--------------------------------");
+      // print("last action: actions size: ${actions.length}");
+        action.last.printBillAction();
+        var mostRecentAction = (actions.isNotEmpty && actions.length > 0) 
+            ? action.first // Or some other safe access
+            : null;
+  
+        mostRecentAction?.committees = action.first.committees ?? [];
+              
+        return Consumer<UserNotifier>(
+          builder: (context, user, child){
+            return BillCard(
+              bill: bill,
+              action: mostRecentAction ?? BillActions(actionDate: "a", text: "a", type: "a", committees: [], actionCode: "a"), // Pass null if no summaries exist
+              isPinned: user.user!.likes.contains(bills[index].billId)
+            );
+          },
+        );
+      },
+      separatorBuilder: (context, index){
+        return SizedBox(height: 8.0);
+      }
+    );
+  }
+}
 class BillCard extends StatefulWidget {
   final Bill bill;
   final BillActions action;
+  final bool isPinned;
 
   const BillCard({
-    Key? key,
+    super.key,
     required this.bill,
     required this.action,
-  }) : super(key: key);
+    required this.isPinned,
+  });
 
   @override
   State<BillCard> createState() => _BillCardState();
 }
 
 class _BillCardState extends State<BillCard> {
+  FirestoreService fs = FirestoreService();
   String? actionStatus;
   String? committee;
   String? date;
@@ -232,7 +256,7 @@ class _BillCardState extends State<BillCard> {
       style: ElevatedButton.styleFrom(
           backgroundColor: Color.fromARGB(255, 236, 189, 142),       // Button background color
           //foregroundColor: Colors.white,      // Text/icon color
-          minimumSize: Size(150, 40),         // Set specific width and height
+          minimumSize: Size(150,40),         // Set specific width and height
           padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -277,7 +301,23 @@ class _BillCardState extends State<BillCard> {
                 fontWeight: FontWeight.bold
               ),
             ),
-            const SizedBox(height: 16),
+            //TODO: Condition icon and function based on if its in likes already. isLiked = user.user.likes.contains(billid)?
+            Consumer<UserNotifier>(
+              builder: (context, user, child){
+                //add/remove like based on if its in user likes already
+              return IconButton(
+                onPressed: () async{ user.user!.likes.contains(widget.bill.billId) ? 
+                ( user.removeLike(widget.bill.billId)) : (user.addLike(widget.bill.billId));
+                print("state's likes after pressing: ${user.user!.likes}");}, 
+
+                icon: user.user!.likes.contains(widget.bill.billId) ? 
+                Icon(Icons.push_pin) :
+                Icon(Icons.push_pin_outlined)
+                ); 
+              }
+            )
+
+            //const SizedBox(height: 16),
           ],
         ),
       ),

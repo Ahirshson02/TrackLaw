@@ -4,6 +4,7 @@ import 'package:tracklaw/apis/congressAPI.dart';
 import 'package:tracklaw/models/congress.dart';
 import 'package:tracklaw/src/feedPage.dart';
 
+
 class LoadingScreen extends StatefulWidget {
   static String id = 'loading_screen';
   @override
@@ -11,6 +12,7 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
+  
   final user = FirebaseAuth.instance.currentUser!;
   Future<Map<String, dynamic>> fetchData() async {
     CongressApiService api = CongressApiService();
@@ -18,7 +20,43 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
     List<Bill> bills = await api.searchBills();
     Map<String, List<BillActions>> billNumberToActions = {};
+    if(bills.isEmpty){
+      bills.add(Bill.fromJson({
+      "congress": 118,
+      "orginChamber": "House",
+      "chamberCode": "H",
+      "billType": "HR",
+      "billNumber": "123",
+      "title": "To improve healthcare access in rural communities and for other purposes.",
+      "latestAction": {
+        "actionDate": "2024-03-15",
+        "text": "Referred to the Committee on Energy and Commerce."
+      },
+      "introducedDate": "2024-03-01T:10:30:00Z",
+      "updateDate": "2024-03-15T10:30:00Z",
+      "urlForMore": "https://www.congress.gov/bill/118th-congress/house-bill/1234"
+      }));
 
+      billNumberToActions[bills[0].billId] = [BillActions.fromJson(
+        {
+        "actionCode": "Intro-H",
+        "actionDate": "2024-03-15",
+        "committees": [
+          {
+            "name": "Committee on Energy and Commerce",
+            "systemCode": "hsif00",
+            "url": "https://www.congress.gov/committee/house-energy-and-commerce"
+          }
+        ],
+        "text": "Introduced in House",
+        "type": "IntroReferral"
+      }
+      )];
+      return{
+        "bills": bills,
+        "actions": billNumberToActions,
+      };
+    } //end if bills.isEmpty
     await Future.wait(bills.map((b) async {
       if (b.congress != null && b.billType != null && b.billNumber != null) {
         
@@ -29,7 +67,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         );
         billNumberToActions[b.billId] = actions;
   
-        print("billactions DONE");
+       // print("billactions DONE");
       }
       
     }));

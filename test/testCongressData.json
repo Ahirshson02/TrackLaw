@@ -1,0 +1,174 @@
+{
+  "sampleBill": {
+    "congress": 118,
+    "orginChamber": "House",
+    "originChamberCode": "H",
+    "type": "HR",
+    "number": "1234",
+    "title": "To improve healthcare access in rural communities and for other purposes.",
+    "latestAction": {
+      "actionDate": "2024-03-15",
+      "text": "Referred to the Committee on Energy and Commerce."
+    },
+    "updateDate": "2024-03-15T10:30:00Z",
+    "url": "https://www.congress.gov/bill/118th-congress/house-bill/1234"
+  },
+
+  "sampleBillActions": [
+    {
+      "actionCode": "Intro-H",
+      "actionDate": "2024-03-15",
+      "committees": [
+        {
+          "name": "Committee on Energy and Commerce",
+          "systemCode": "hsif00",
+          "url": "https://www.congress.gov/committee/house-energy-and-commerce"
+        }
+      ],
+      "text": "Introduced in House",
+      "type": "IntroReferral"
+    },
+    {
+      "actionCode": "H11100",
+      "actionDate": "2024-03-15",
+      "committees": [
+        {
+          "name": "Committee on Energy and Commerce",
+          "systemCode": "hsif00",
+          "url": "https://www.congress.gov/committee/house-energy-and-commerce"
+        }
+      ],
+      "text": "Referred to the Committee on Energy and Commerce.",
+      "type": "Committee"
+    },
+    {
+      "actionCode": "14000",
+      "actionDate": "2024-04-20",
+      "committees": [
+        {
+          "name": "Subcommittee on Health",
+          "systemCode": "hsif14",
+          "url": "https://www.congress.gov/committee/house-energy-and-commerce/hsif14"
+        }
+      ],
+      "text": "Referred to the Subcommittee on Health.",
+      "type": "Committee"
+    }
+  ],
+
+  "sampleCommittees": [
+    {
+      "name": "Committee on Energy and Commerce",
+      "systemCode": "hsif00",
+      "url": "https://www.congress.gov/committee/house-energy-and-commerce"
+    },
+    {
+      "name": "Committee on Ways and Means",
+      "systemCode": "hswm00",
+      "url": "https://www.congress.gov/committee/house-ways-and-means"
+    }
+  ],
+
+  "sampleBillSummary": {
+    "updateDate": "2024-03-15T10:30:00Z",
+    "actionDate": "2024-03-15",
+    "actionDesc": "Introduced in House",
+    "text": "Rural Healthcare Access Improvement Act - This bill establishes grant programs to improve healthcare access in rural and underserved communities. The bill authorizes the Department of Health and Human Services to provide funding for telemedicine infrastructure, mobile health clinics, and recruitment of healthcare professionals to rural areas. The bill also includes provisions for expanding broadband access to support telehealth services.",
+    "versionCode": "IH"
+  },
+
+  "sampleBillData": {
+    "request": {
+      "billNumber": "1234",
+      "billType": "HR",
+      "congress": "118"
+    },
+    "textVersions": [
+      {
+        "type": "Introduced in House",
+        "date": "2024-03-15T00:00:00Z",
+        "formats": [
+          {
+            "type": "PDF",
+            "url": "https://www.congress.gov/118/bills/hr1234/BILLS-118hr1234ih.pdf"
+          },
+          {
+            "type": "XML",
+            "url": "https://www.congress.gov/118/bills/hr1234/BILLS-118hr1234ih.xml"
+          },
+          {
+            "type": "HTML",
+            "url": "https://www.congress.gov/118/bills/hr1234/BILLS-118hr1234ih.html"
+          }
+        ]
+      },
+      {
+        "type": "Reported in House",
+        "date": "2024-05-20T00:00:00Z",
+        "formats": [
+          {
+            "type": "PDF",
+            "url": "https://www.congress.gov/118/bills/hr1234/BILLS-118hr1234rh.pdf"
+          },
+          {
+            "type": "XML",
+            "url": "https://www.congress.gov/118/bills/hr1234/BILLS-118hr1234rh.xml"
+          }
+        ]
+      }
+    ]
+  },
+
+  "multipleBillsExample": [
+    {
+      "congress": 118,
+      "orginChamber": "House",
+      "originChamberCode": "H",
+      "type": "HR",
+      "number": "1234",
+      "title": "Rural Healthcare Access Improvement Act",
+      "latestAction": {
+        "actionDate": "2024-03-15",
+        "text": "Referred to the Committee on Energy and Commerce."
+      },
+      "updateDate": "2024-03-15T10:30:00Z",
+      "url": "https://www.congress.gov/bill/118th-congress/house-bill/1234"
+    },
+    {
+      "congress": 118,
+      "orginChamber": "Senate",
+      "originChamberCode": "S",
+      "type": "S",
+      "number": "567",
+      "title": "Climate Change Research Enhancement Act of 2024",
+      "latestAction": {
+        "actionDate": "2024-02-28",
+        "text": "Read twice and referred to the Committee on Environment and Public Works."
+      },
+      "updateDate": "2024-02-28T14:45:00Z",
+      "url": "https://www.congress.gov/bill/118th-congress/senate-bill/567"
+    },
+    {
+      "congress": 118,
+      "orginChamber": "House",
+      "originChamberCode": "H",
+      "type": "HR",
+      "number": "890",
+      "title": "Small Business Tax Relief Act",
+      "latestAction": {
+        "actionDate": "2024-04-10",
+        "text": "Passed House by voice vote."
+      },
+      "updateDate": "2024-04-10T16:20:00Z",
+      "url": "https://www.congress.gov/bill/118th-congress/house-bill/890"
+    }
+  ],
+
+  "sampleActionWithNoCommittee": {
+    "actionCode": "H38310",
+    "actionDate": "2024-04-10",
+    "committees": null,
+    "text": "Motion to reconsider laid on the table Agreed to without objection.",
+    "type": "Floor"
+  }
+}

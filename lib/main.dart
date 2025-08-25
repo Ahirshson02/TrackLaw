@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
@@ -14,8 +13,9 @@ import 'package:tracklaw/landingPage/openingPage.dart';
 void main() async {
   WidgetsFlutterBinding
       .ensureInitialized(); // Ensures Flutter is ready before Firebase initializes
-  await dotenv.load(fileName: ".env");  //path to your .env file);
+  
   await Firebase.initializeApp();
+  await dotenv.load(fileName: ".env");  //path to your .env file);
   
   runApp(ChangeNotifierProvider(
     create: (context) => UserNotifier(),

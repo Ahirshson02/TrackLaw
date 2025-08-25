@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tracklaw/landingPage/loadingScreen.dart';
-import 'package:tracklaw/registerPage/signInField.dart';
-import 'package:tracklaw/landingPage/signInButton.dart';
+import 'package:tracklaw/userAuth/signInField.dart';
+import 'package:tracklaw/userAuth/signInButton.dart';
 
 class LoginAccount extends StatefulWidget {
   const LoginAccount({Key? key}) : super(key: key);

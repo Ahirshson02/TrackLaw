@@ -27,8 +27,7 @@ class CongressApiService {
     }
   }
 
-  Future<List<BillActions>> getBillActions(
-      int congress, String billType, String billNumber) async {
+  Future<List<BillActions>> getBillActions(int congress, String billType, String billNumber) async {
     print("In getBillActions");
     billType = billType.toLowerCase(); //billType must be lowercase
     final url ='$baseUrl/bill/$congress/$billType/$billNumber/actions?api_key=$apiKey&format=json';
@@ -124,21 +123,28 @@ class CongressApiService {
     int limit = 50,
   }) async {
     String url =
-        '$baseUrl/bill?api_key=$apiKey&offset=$offset&limit=$limit&format=json&fromDateTime=2024-01-01T12:30:30Z&toDateTime=2025-03-01T12:30:30Z';
+        '$baseUrl/bill?api_key=$apiKey&offset=$offset&limit=$limit&format=json';
     //&fromDateTime=2022-01-01T12:30:30Z&toDateTime=2024-01-01T12:30:30Z
     print("searchBills URL: $url");
     if (congress != null) url += '&congress=$congress';
     if (billType != null) url += '&billType=$billType';
     print("==== awaiting searchBills.response ====");
-    final response = await http.get(Uri.parse(url));
-    print("==== Gotten response =====");
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final bills = data['bills'] as List;
-      return bills.map((bill) => Bill.fromJson(bill)).toList();
-    } else {
-      throw Exception('Failed to search bills: ${response.statusCode}');
+    try{
+      final response = await http.get(Uri.parse(url));
+      print("==== Gotten response =====");
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final bills = data['bills'] as List;
+        return bills.map((bill) => Bill.fromJson(bill)).toList();
+      } else {
+        print("ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt");
+        throw Exception('Failed to search bills: ${response.statusCode}');
+      }
+    }catch(e){
+      print("searchBills catch:");
+      return [];
     }
+
   }
 }
 

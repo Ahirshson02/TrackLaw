@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:tracklaw/landingPage/signInButton.dart';
+import 'package:tracklaw/userAuth/signInButton.dart';
 import 'package:tracklaw/landingPage/loadingScreen.dart';
-import 'package:tracklaw/loginPage/loginPage.dart';
-import 'package:tracklaw/registerPage/signInField.dart';
+import 'package:tracklaw/userAuth/loginPage.dart';
+import 'package:tracklaw/userAuth/signInField.dart';
 import 'package:tracklaw/landingPage/imageBox.dart';
 //import 'package:tracklaw/First_page/Button.dart';
 

@@ -223,7 +223,7 @@ class _LegislationPageState extends State<LegistlationPage>{
       });
     }
   }
-   static String convertToPlainText(String htmlString) {
+   static String convertToPlainText(String? htmlString) {
     if (htmlString == null || htmlString.isEmpty) {
       return '';
     }
