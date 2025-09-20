@@ -91,24 +91,24 @@ class _RegisterNewAccount extends State<RegisterNewAccount> {
                 hintText: 'Username',
                 obscureText: false),
             //email
-            SizedBox(height: 30),
+            SizedBox(height: 20),
             SignInField(
                 controller: emailController,
                 hintText: 'email',
                 obscureText: false),
             //password
-            SizedBox(height: 30),
+            SizedBox(height: 20),
             SignInField(
                 controller: passwordController,
                 hintText: 'password',
                 obscureText: hidePassword),
             //retypePassword
-            SizedBox(height: 30),
+            SizedBox(height: 20),
             SignInField(
                 controller: reTypePasswordController,
                 hintText: 'Retype your password',
                 obscureText: hideConfirmPassword),
-            SizedBox(height: 50),
+            SizedBox(height: 40),
             Text('You can also register with the following',
                 style: TextStyle(fontSize: 15, color: Colors.grey)),
             SizedBox(height: 10),
@@ -123,7 +123,7 @@ class _RegisterNewAccount extends State<RegisterNewAccount> {
                 ))
               ],
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 15),
             Padding(
                 padding: const EdgeInsets.only(
                   right: 1,
@@ -138,7 +138,7 @@ class _RegisterNewAccount extends State<RegisterNewAccount> {
                     ImageBox(imagePath: 'lib/images/GoogleImage.png')
                   ],
                 )),
-            SizedBox(height: 20),
+            SizedBox(height: 15),
             InkWell(
               child: Text('Already have an account? click here',
                   style: TextStyle(fontSize: 15, color: Colors.blue)),

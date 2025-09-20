@@ -1,9 +1,9 @@
 
 import 'dart:convert';
 
-class Bill {
+class Bill {// If any issues with Bill, change latestAction back to LatestAction type
   final int? congress;
-  final LatestAction? latestAction;
+  final BillActions? latestAction;
   final String? billNumber;
   final String? originChamber;
   final String? chamberCode;
@@ -26,6 +26,15 @@ class Bill {
     this.urlForMore,
   });
 
+
+  @override
+  bool operator ==(Object other) {
+    if(identical(this, other)) return true;
+    return other is Bill && other.billId == billId;
+  }
+  @override
+  int get hashCode => billId.hashCode;
+
   factory Bill.fromJson(Map<String, dynamic> json) {
     Bill? bill = null;
     try {
@@ -33,10 +42,10 @@ class Bill {
         congress: json['congress'],
         originChamber: json['orginChamber'],
         chamberCode: json['originChamberCode'],
-        billType: json['type'],
-        billNumber: json['number'],
+        billType: json['billType'],
+        billNumber: json['billNumber'],
         title: json['title'],
-        latestAction: LatestAction.fromJson(json['latestAction']),
+        latestAction: BillActions.fromJson(json['latestAction']),
         updateDate: json['updateDate'],
         urlForMore: json['url'],
       );
@@ -49,7 +58,7 @@ class Bill {
   Map<String, dynamic> toJson() {
   return {
     'congress': congress,
-    'latestAction': latestAction, // Assuming LatestAction has a toJson method
+    'latestAction': latestAction?.toJson(), // Assuming LatestAction has a toJson method
     'billNumber': billNumber,
     'originChamber': originChamber,
     'chamberCode': chamberCode,
@@ -109,6 +118,17 @@ class BillActions {
     required this.text,
     required this.type,
   });
+
+  
+  Map<String, dynamic> toJson() {
+    return {
+      'actionCode': actionCode,
+      'actionDate': actionDate,
+      'committies': committees?.map((c) => c.toJson()).toList(),
+      'text': text,
+      'type': type
+    };
+  }
 
   factory BillActions.fromJson(Map<String, dynamic> json) {
     try{
